@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <string.h>
-// #include <fuse.h>
+#include <fuse.h>
 #include "metadata.h"
 #include "amp_kernal.h"
 
@@ -13,7 +13,7 @@ static int amp_readdir(const char* path, void* buf, fuse_fill_dir_t filler,
 {
     //循环的计数变量
     int i;
-    metadata_entry_t* meta_en;
+    metadata_entry_t* meta_en = NULL;
 
     printf("查看是不是根目录\n");
     //因为没有path的设定，所以只要不是跟目录的就报错
@@ -46,6 +46,9 @@ static int amp_getattr(const char* path, struct stat* st)
     int i;
     //判断是不是找到了
     int judge = -1;
+
+    metadata_entry_t* meta_en = NULL;
+    meta_en = *meta_table_point;
 
     memset(st, 0, sizeof(struct stat));
 
@@ -91,6 +94,6 @@ int main(int argc, char* argv[])
     printf("开始运行\n");
     init_metadata_table(meta_table_point);
 
-    //return fuse_main(argc, argv, &oufs_ops, NULL);
-    printf("运行结束\n");
+    return fuse_main(argc, argv, &oufs_ops, NULL);
+    //printf("运行结束\n");
 }
