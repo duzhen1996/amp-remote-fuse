@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 #include <memory.h>
+#include <sys/stat.h>
+#include <unistd.h>
 //这个函数处理元数据的结构问题
 
 //元数据表大小
@@ -25,8 +27,8 @@ void init_metadata_table(metadata_entry_t **input_meta_table){
     //申请一段空间，来存储元数据
     //用一个临时指针来申请空间
     printf("准备初始化元数据表");
-    // metadata_entry_t* tmp_point = 
-    //     (metadata_entry_t*)malloc(sizeof(metadata_entry_t)*META_TABLE_SIZE);
+    metadata_entry_t* tmp_point = 
+        (metadata_entry_t*)malloc(sizeof(metadata_entry_t)*META_TABLE_SIZE);
 
     //初始化所有的空间
     printf("正在初始化分配的空间");
