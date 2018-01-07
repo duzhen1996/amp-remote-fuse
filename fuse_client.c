@@ -33,7 +33,9 @@ static struct fuse_operations oufs_ops = {
 int main(int argc, char* argv[])
 {
     //因为已经在全局有元数据表的指针了，这里我们要初始化这个表
+    printf("开始运行");
     init_metadata_table(meta_table_point);
 
     //return fuse_main(argc, argv, &oufs_ops, NULL);
+    printf("运行结束");
 }
