@@ -12,7 +12,7 @@ CFLAGS = -I${INC_AMP} -I${INC_THIS}
 LDPATH_AMP = ${TOP_DIR}/lib/
 LIBNAME_AMP = amp
 LDFLAGS_AMP = -L${LDPATH_AMP} -l${LIBNAME_AMP}
-LDFLAGS = -lm -lpthread -lrt `pkg-config fuse --cflags --libs`
+LDFLAGS = -lm -lrt -D_FILE_OFFSET_BITS=64 -I/usr/local/include/fuse -L/usr/local/lib -lfuse -pthread -ldl
 
 
 EXE_FILES = fuse_client
