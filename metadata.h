@@ -16,11 +16,11 @@ struct __metadata_entry {
     struct stat *meta;
 };
 
-//一个50位的元数据表
-struct __metadata_entry* meta_table;
+//一个指向50位的元数据表指针的指针
+struct __metadata_entry** meta_table_point;
 
 //元数据表的初始化函数
-void init_metadata_table(struct __metadata_entry *input_meta_table){
+void init_metadata_table(struct __metadata_entry **input_meta_table){
     //申请一段空间，来存储元数据
     //用一个临时指针来申请空间
     struct __metadata_entry* tmp_point = 
@@ -31,6 +31,7 @@ void init_metadata_table(struct __metadata_entry *input_meta_table){
 
     //判断一个这个条目是不是有东西，主要就是判断两个指针是不是都是0。当两个指针是0的时候
     //就代表这个条目是空的
+    *input_meta_table = tmp_point;
 }
 
 #endif
