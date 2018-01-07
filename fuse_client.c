@@ -26,15 +26,15 @@ static int amp_readdir(const char* path, void* buf, fuse_fill_dir_t filler,
     for(i = 0; i < META_TABLE_SIZE; i++){
         //如果两个指针都是0，那就退出
         if(meta_en[i].path_name == 0 && meta_en[i].meta == 0){
-            printf("遍历完毕");
+            printf("遍历完毕\n");
             break;
         }else{
-            printf("找到一条元数据");
+            printf("找到一条元数据\n");
             filler(buf, meta_en[i].path_name, meta_en[i].meta,0);
         }
     }
 
-    return filler(buf, "凑数", NULL, 0);
+    return filler(buf, "凑数\n", NULL, 0);
 
     return 0;
 }
@@ -49,19 +49,19 @@ static int amp_getattr(const char* path, struct stat* st)
 
     memset(st, 0, sizeof(struct stat));
 
-    printf("查看文件类型");
+    printf("查看文件类型\n");
     if (strcmp(path, "/") == 0){
         st->st_mode = 0755 | S_IFDIR;
     }else{
         for(i = 0; i < META_TABLE_SIZE; i++){
             //如果两个指针都是0，那就退出
             if(meta_en[i].path_name == 0 && meta_en[i].meta == 0){
-                printf("遍历完毕");
+                printf("遍历完毕\n");
                 break;
             }else{
                 //查看目录是不是一样的
                 if(strcmp(path, meta_en[i].path_name)==0){
-                    printf("找到了");
+                    printf("找到了\n");
                     judge = 0;
                     *st = *(meta_en[i].meta);
                     break;
