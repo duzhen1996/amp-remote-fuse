@@ -41,7 +41,7 @@ void init_metadata_table(){
     // input_meta_table = &tmp_point;
     //上面两种书写都不对，不能全局变量指向局部变量的值：http://blog.csdn.net/qq_28093585/article/details/77752501
     // 也不能直接去取地址0的内容
-    *input_meta_table = tmp_point;
+    *meta_table_point = tmp_point;
     printf("元数据表初始化完毕\n");
 }
 
