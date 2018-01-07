@@ -25,7 +25,7 @@ OBJS = fuse_client.o
 		${CC} -Wall -D_FILE_OFFSET_BITS=64 -I/usr/local/include/fuse -L/usr/local/lib -lfuse -pthread -ldl ${CFLAGS} ${EXTRA_CFLAGS} -g -c $*.c
 
 fuse_client: fuse_client.o
-		${CC} -Wall -D_FILE_OFFSET_BITS=64 -I/usr/local/include/fuse -L/usr/local/lib -lfuse -pthread -ldl -O2 -g -o $@ ${CLIENT_OBJ} ${LDFLAGS} ${LDFLAGS_AMP} 
+		${CC} -O2 -g -o $@ ${CLIENT_OBJ} ${LDFLAGS} ${LDFLAGS_AMP} 
 
 clean:
 	${RM} *.o core ~* *.cpp ${EXE_FILES}
