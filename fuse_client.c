@@ -5,7 +5,7 @@
 #include <string.h>
 // #include <fuse.h>
 #include "metadata.h"
-// #include "amp_kernal.h"
+#include "amp_kernal.h"
 
 // static int ou_readdir(const char* path, void* buf, fuse_fill_dir_t filler,
 //                       off_t offset, struct fuse_file_info* fi)
