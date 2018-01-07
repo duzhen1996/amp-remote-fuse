@@ -1,5 +1,5 @@
 //远程文件系统的实现
-// #define FUSE_USE_VERSION 26
+#define FUSE_USE_VERSION 26
 
 #include <stdio.h>
 #include <string.h>
@@ -84,8 +84,8 @@ static int amp_getattr(const char* path, struct stat* st)
 }
 
 static struct fuse_operations oufs_ops = {
-    .readdir    =   amp_readdir,
     .getattr    =   amp_getattr,
+    .readdir    =   amp_readdir,
 };
 
 int main(int argc, char* argv[])

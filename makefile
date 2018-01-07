@@ -12,7 +12,7 @@ CFLAGS = -I${INC_AMP} -I${INC_THIS}
 LDPATH_AMP = ${TOP_DIR}/lib/
 LIBNAME_AMP = amp
 LDFLAGS_AMP = -L${LDPATH_AMP} -l${LIBNAME_AMP}
-LDFLAGS = -lm -lrt
+LDFLAGS = -lm -lrt -lpthread -lfuse -ldl
 
 
 EXE_FILES = fuse_client
