@@ -15,7 +15,7 @@ struct __metadata_entry {
     //指向元数据指针
     struct stat *meta;
 };
-typedef struct __metadata_entry metadata_entry_t
+typedef struct __metadata_entry metadata_entry_t;
 
 //一个指向50位的元数据表指针的指针
 metadata_entry_t** meta_table_point;
