@@ -7,28 +7,83 @@
 #include "metadata.h"
 #include "amp_kernal.h"
 
-// static int ou_readdir(const char* path, void* buf, fuse_fill_dir_t filler,
-//                       off_t offset, struct fuse_file_info* fi)
-// {
-//     return filler(buf, "hello-world", NULL, 0);
-// }
+//读一个目录中的内容
+static int amp_readdir(const char* path, void* buf, fuse_fill_dir_t filler,
+                      off_t offset, struct fuse_file_info* fi)
+{
+    //循环的计数变量
+    int i;
+    metadata_entry_t* meta_en;
 
-// static int ou_getattr(const char* path, struct stat* st)
-// {
-//     memset(st, 0, sizeof(struct stat));
+    printf("查看是不是根目录\n");
+    //因为没有path的设定，所以只要不是跟目录的就报错
+    if (strcmp(path, "/") != 0)
+		return -ENOENT;
+    
+    printf("遍历元数据表\n");
+    meta_en = *meta_table_point;
+    //遍历元数据表
+    for(i = 0; i < META_TABLE_SIZE; i++){
+        //如果两个指针都是0，那就退出
+        if(meta_en[i].path_name == 0 && meta_en[i].meta == 0){
+            printf("遍历完毕");
+            break;
+        }else{
+            printf("找到一条元数据");
+            filler(buf, meta_en[i].path_name, meta_en[i].meta,0);
+        }
+    }
 
-//     if (strcmp(path, "/") == 0)
-//         st->st_mode = 0755 | S_IFDIR;
-//     else
-//         st->st_mode = 0644 | S_IFREG;
+    return filler(buf, "凑数", NULL, 0);
 
-//     return 0;
-// }
+    return 0;
+}
 
-// static struct fuse_operations oufs_ops = {
-//     .readdir    =   ou_readdir,
-//     .getattr    =   ou_getattr,
-// };
+//获得一个一个文件的基本信息
+static int amp_getattr(const char* path, struct stat* st)
+{
+    //空间初始化
+    int i;
+    //判断是不是找到了
+    int judge = -1;
+
+    memset(st, 0, sizeof(struct stat));
+
+    printf("查看文件类型");
+    if (strcmp(path, "/") == 0){
+        st->st_mode = 0755 | S_IFDIR;
+    }else{
+        for(i = 0; i < META_TABLE_SIZE; i++){
+            //如果两个指针都是0，那就退出
+            if(meta_en[i].path_name == 0 && meta_en[i].meta == 0){
+                printf("遍历完毕");
+                break;
+            }else{
+                //查看目录是不是一样的
+                if(strcmp(path, meta_en[i].path_name)==0){
+                    printf("找到了");
+                    judge = 0;
+                    *st = *(meta_en[i].meta);
+                    break;
+                }
+            }
+        }
+        //保证权限与类型
+        st->st_mode = 0644 | S_IFREG;
+    }
+    
+    //搜索元数据
+    if(judge == -1){
+        return -errno;
+    }
+
+    return 0;
+}
+
+static struct fuse_operations oufs_ops = {
+    .readdir    =   amp_readdir,
+    .getattr    =   amp_getattr,
+};
 
 int main(int argc, char* argv[])
 {

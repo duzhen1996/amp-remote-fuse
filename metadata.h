@@ -13,7 +13,7 @@
 //定义每一个元数据表中的条目
 struct __metadata_entry {
     //指向路径名称的指针，到时候可以把一个path名称拷贝到一个空间中
-    char* pathName;
+    char* path_name;
     //指向元数据指针
     struct stat *meta;
 };
