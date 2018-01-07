@@ -6,4 +6,5 @@
 
 ## 完成ls操作
 
-完成ls操作需要实现fuse的readdir和getattr两个接口。
+完成ls操作需要实现fuse的readdir和getattr两个接口。这样子我们就可以直接对文件系统挂载的目录实现ls操作。
+
