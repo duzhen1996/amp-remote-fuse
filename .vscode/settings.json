@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "amp_kernal.h": "c",
+        "metadata.h": "c",
+        "unistd.h": "c"
+    }
+}

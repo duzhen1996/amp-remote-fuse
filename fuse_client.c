@@ -4,6 +4,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <fuse.h>
+#include <errno.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <dirent.h>
 #include "metadata.h"
 #include "amp_kernal.h"
 
