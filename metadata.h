@@ -15,23 +15,27 @@ struct __metadata_entry {
     //指向元数据指针
     struct stat *meta;
 };
+typedef struct __metadata_entry metadata_entry_t
 
 //一个指向50位的元数据表指针的指针
 struct __metadata_entry** meta_table_point;
 
 //元数据表的初始化函数
-void init_metadata_table(struct __metadata_entry **input_meta_table){
+void init_metadata_table(metadata_entry_t **input_meta_table){
     //申请一段空间，来存储元数据
     //用一个临时指针来申请空间
-    struct __metadata_entry* tmp_point = 
-        (struct __metadata_entry*)malloc(sizeof(struct __metadata_entry)*META_TABLE_SIZE);
+    printf("准备初始化元数据表");
+    metadata_entry_t* tmp_point = 
+        (metadata_entry_t*)malloc(sizeof(metadata_entry_t)*META_TABLE_SIZE);
 
     //初始化所有的空间
-    memset(tmp_point, 0, sizeof(struct __metadata_entry)*META_TABLE_SIZE);
+    printf("正在初始化分配的空间");
+    memset(tmp_point, 0, sizeof(metadata_entry_t)*META_TABLE_SIZE);
 
     //判断一个这个条目是不是有东西，主要就是判断两个指针是不是都是0。当两个指针是0的时候
     //就代表这个条目是空的
     *input_meta_table = tmp_point;
+    printf("元数据表初始化完毕");
 }
 
 #endif
