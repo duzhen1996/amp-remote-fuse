@@ -18,7 +18,7 @@ struct __metadata_entry {
 typedef struct __metadata_entry metadata_entry_t;
 
 //一个指向50位的元数据表指针的指针
-metadata_entry_t** meta_table_point;
+metadata_entry_t** meta_table_point = NULL;
 
 //元数据表的初始化函数
 void init_metadata_table(metadata_entry_t **input_meta_table){
