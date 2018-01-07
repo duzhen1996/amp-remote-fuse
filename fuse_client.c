@@ -5,7 +5,7 @@
 #include <string.h>
 // #include <fuse.h>
 #include "metadata.h"
-#include "amp_kernal.h"
+// #include "amp_kernal.h"
 
 // static int ou_readdir(const char* path, void* buf, fuse_fill_dir_t filler,
 //                       off_t offset, struct fuse_file_info* fi)
@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 {
     //因为已经在全局有元数据表的指针了，这里我们要初始化这个表
     printf("开始运行");
-    init_metadata_table(meta_table_point);
+    // init_metadata_table(meta_table_point);
 
     //return fuse_main(argc, argv, &oufs_ops, NULL);
     printf("运行结束");
