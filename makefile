@@ -22,10 +22,10 @@ CLIENT_OBJ=fuse_client.o
 OBJS = fuse_client.o
 
 .c.o:
-		${CC} ${CFLAGS} ${EXTRA_CFLAGS} -g -c $*.c
+		${CC} -Wall ${CFLAGS} ${EXTRA_CFLAGS} -g -c $*.c
 
 fuse_client: fuse_client.o
-		${CC}  -O2 -g -o $@ ${CLIENT_OBJ} ${LDFLAGS} ${LDFLAGS_AMP} 
+		${CC} -Wall  -O2 -g -o $@ ${CLIENT_OBJ} ${LDFLAGS} ${LDFLAGS_AMP} 
 
 clean:
 	${RM} *.o core ~* *.cpp ${EXE_FILES}
