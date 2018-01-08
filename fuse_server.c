@@ -180,7 +180,7 @@ int slove_request(amp_request_t *req){
 	//根据请求类型处理
 	//这里处理新增文件的请求
 	//首先先把自定义消息那里拿出来
-	fuse_msg_t* fuse_msg = NULL;
+	fuse_msg_t* fusemsg = NULL;
 	
 	fusemsg = (fuse_msg_t *)((char *)req->req_msg + AMP_MESSAGE_HEADER_LEN);
 	
@@ -195,7 +195,7 @@ int slove_request(amp_request_t *req){
 	strcpy(dest_path, ROOT_PATH);
 	strcat(dest_path, tmp_path_name);
 
-	if(fuse_msg->type == 0){
+	if(fusemsg->type == 0){
 		printf("处理一个文件创建请求\n");
 
 		//创建一个权限完全开放的文件
