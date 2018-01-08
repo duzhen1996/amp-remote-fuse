@@ -22,7 +22,7 @@ int server_queue_req (amp_request_t *req)
 
 //段分配函数
 //我觉得直接从fuse_msg_t的byte来判断空间的分配比较好
-int server_alloc_pages (void *msg, amp_u32_t *num, amp_kiov_t **iov)
+int server_alloc_pages (void *msg, amp_u32_t *niov, amp_kiov_t **iov)
 {
     //用来暂存函数运行状态（错误码）
     int err = 0;
@@ -185,7 +185,7 @@ int main(){
 		__amp_free_request(req);
 		//根据消息，分别处理
 		//收到消息之后不回复，先看看可以走通吗
-		
+
 	}
 
 	return 0;

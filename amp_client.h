@@ -10,7 +10,7 @@ static amp_comp_context_t *clt_ctxt = NULL;
 //这里需要吉祥二宝，作为客户端首先消息的时候分配空间的依据
 //和服务器端保持一致即可
 //段分配函数
-int client_alloc_pages (void *msg, amp_u32_t *num, amp_kiov_t **iov)
+int client_alloc_pages (void *msg, amp_u32_t *niov, amp_kiov_t **iov)
 {
     //用来暂存函数运行状态（错误码）
     int err = 0;
@@ -219,7 +219,7 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
 
     printf("消息发送完毕");
     //尝试不接受回信
-    
+
     return 0
 }
 
