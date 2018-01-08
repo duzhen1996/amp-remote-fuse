@@ -162,7 +162,7 @@ int send_to_client(amp_request_t *req, int result, char* buf){
 
 	//然后把东西发回去
 	amp_send_sync(this_ctxt, req, req->req_remote_type, req->req_remote_id,0);
-
+	
 	//回收空间
 	amp_free(req->req_reply, req->req_replylen);
     __amp_free_request(req);
@@ -196,16 +196,18 @@ int slove_request(amp_request_t *req){
 	strcat(dest_path, tmp_path_name);
 
 	if(fusemsg->type == 0){
-		printf("处理一个文件创建请求\n");
+		printf("处理一个文件创建请求%s\n",dest_path);
 
 		//创建一个权限完全开放的文件
 		//注意是0777来表示这个是8进制数字
 		res = open(dest_path, O_CREAT | O_EXCL | O_WRONLY, 0777);
 		if (res >= 0){
+			printf("文件创建成功\n");
 			res = close(res);
-			send_to_client(req,0,NULL);
+			send_to_client(req,1,NULL);
 		}else{
-			send_to_client(req,-1,NULL);
+			printf("文件创建失败");
+			send_to_client(req,0,NULL);
 		}
 	}
 	return 0;
