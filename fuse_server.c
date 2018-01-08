@@ -125,7 +125,7 @@ void server_free_pages (amp_u32_t num, amp_kiov_t **kiov)
 int main(){
 	int err = 0;
 	int addr;
-	struct in_addr  naddr;
+	struct in_addr naddr;
 	amp_request_t  *req = NULL;
 	fuse_msg_t   *msg_get = NULL;
 
