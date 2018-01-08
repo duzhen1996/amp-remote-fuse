@@ -197,9 +197,12 @@ int slove_request(amp_request_t *req){
 		//创建一个权限完全开放的文件
 		//注意是0777来表示这个是8进制数字
 		res = open(dest_path, O_CREAT | O_EXCL | O_WRONLY, 0777);
-		if (res >= 0)
+		if (res >= 0){
 			res = close(res);
-		
+			send_to_client(req,0,NULL);
+		}else{
+			send_to_client(req,-1,NULL);
+		}
 	}
 }
 

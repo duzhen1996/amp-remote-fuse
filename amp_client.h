@@ -122,6 +122,7 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
 	amp_request_t *req = NULL;
 	fuse_msg_t *fusemsg = NULL;
 	amp_message_t *reqmsg = NULL;
+	amp_message_t *replymsg = NULL;
 	
     //为一个消息申请空间的大小
     int size;
