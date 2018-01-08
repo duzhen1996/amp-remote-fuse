@@ -142,7 +142,7 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
 	//amp_lock_init(&request_queue_lock);
 	//amp_sem_init_locked(request_queue_sem);
     //初始化消息上下文
-	this_ctxt = amp_sys_init(CLIENT, CLIENT_ID1);
+	clt_ctxt = amp_sys_init(CLIENT, CLIENT_ID1);
 
 	if (!this_ctxt) {
 		printf("客户端初始化失败\n");
