@@ -104,7 +104,9 @@ int main(int argc, char* argv[])
     memset(fusemsg, 0, sizeof(fuse_msg_t));
     
     fusemsg->type = 0;
-    fusemsg->path_name = "hello";
+
+    sprintf(fusemsg->path_name, "Hello");
+
     fusemsg->length = 0;
     fusemsg->bytes = 0;
     fusemsg->offset = 0;

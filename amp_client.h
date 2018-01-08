@@ -127,7 +127,7 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
     int size;
 
     //循环计数变量
-	int i;
+	// int i;
 
     //设置地址
     err = inet_aton("127.0.0.1", &naddr);
@@ -144,7 +144,7 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
     //初始化消息上下文
 	clt_ctxt = amp_sys_init(CLIENT, CLIENT_ID1);
 
-	if (!this_ctxt) {
+	if (!clt_ctxt) {
 		printf("客户端初始化失败\n");
 		exit(1);
 	}
@@ -152,7 +152,7 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
     printf("客户端初始化完毕\n");
 
     //这里创建连接
-    err = amp_create_connection(this_ctxt, 
+    err = amp_create_connection(clt_ctxt, 
                                     SERVER, 
                                     SERVER_ID1, 
 				    addr,
@@ -165,7 +165,7 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
 
     if (err < 0) {
 		printf("与服务器连接失败, err:%d\n", err);
-		amp_sys_finalize(this_ctxt);
+		amp_sys_finalize(clt_ctxt);
 		exit(1);
 	}
 
@@ -198,7 +198,7 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
 	req->req_resent = 0;
 	req->req_type = AMP_REQUEST|AMP_MSG;
     req->req_niov = 0;
-    req->req_iov = NULL:
+    req->req_iov = NULL;
     
 
     //看看有没有段空间的申请。对于客户端来说，只有写文件需要申请并填充段空间
@@ -220,7 +220,7 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
     printf("消息发送完毕");
     //尝试不接受回信
 
-    return 0
+    return 0;
 }
 
 
