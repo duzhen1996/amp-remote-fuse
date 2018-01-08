@@ -133,7 +133,7 @@ void server_free_pages (amp_u32_t num, amp_kiov_t **kiov)
 //向客户端发送结果，有必要的话需要返回一个buf，result = 1代表发送成功，=0代表发送失败
 int send_to_client(amp_request_t *req, int result, char* buf){
 	//根据结果修改返回请求的值
-	fuse_msg_t* fuse_msg = NULL;
+	fuse_msg_t* fusemsg = NULL;
 	fusemsg = (fuse_msg_t *)((char *)req->req_msg + AMP_MESSAGE_HEADER_LEN);
 
 	//先修改消息，返回yes
@@ -147,8 +147,8 @@ int send_to_client(amp_request_t *req, int result, char* buf){
 	//然后修改包头，把信息的位置换一下，等等操作
 	req->req_reply = req->req_msg;
 	req->req_replylen = req->req_msglen;
-	req->msg=NULL;
-	req->msglen=0;
+	req->req_msg=NULL;
+	req->req_msglen=0;
 	req->req_need_ack = 0;
 	req->req_resent = 0;
 	req->req_type = AMP_REPLY|AMP_MSG;
@@ -161,16 +161,20 @@ int send_to_client(amp_request_t *req, int result, char* buf){
 	}
 
 	//然后把东西发回去
-	amp_send_sync(ctxt, req, req->req_remote_type, req->req_remote_id,0);
+	amp_send_sync(this_ctxt, req, req->req_remote_type, req->req_remote_id,0);
 
 	//回收空间
 	amp_free(req->req_reply, req->req_replylen);
     __amp_free_request(req);
+
+	return 0;
 }
 
 //创建一个函数来处理请求
 int slove_request(amp_request_t *req){
 	
+	int res;
+
 	char* tmp_path_name = NULL;
 	
 	//根据请求类型处理
@@ -189,7 +193,7 @@ int slove_request(amp_request_t *req){
 	//用一个指针来存储真正的路径
 	char dest_path[512];
 	strcpy(dest_path, ROOT_PATH);
-	strcat(str, tmp_path_name);
+	strcat(dest_path, tmp_path_name);
 
 	if(fuse_msg->type == 0){
 		printf("处理一个文件创建请求\n");
@@ -204,6 +208,7 @@ int slove_request(amp_request_t *req){
 			send_to_client(req,-1,NULL);
 		}
 	}
+	return 0;
 }
 
 //main函数
