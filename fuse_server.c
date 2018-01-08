@@ -271,9 +271,9 @@ int main(){
 		//取出消息
 		msg_get = (fuse_msg_t *)((char *)req->req_msg + AMP_MESSAGE_HEADER_LEN);
 		printf("收到了消息[main]type:%d, len:%d, msg:%s\n", msg_get->type, msg_get->bytes, msg_get->path_name);
-		amp_free(req->req_msg, req->req_msglen);
-		__amp_free_request(req);
+
 		//根据消息，分别处理
+		slove_request(req);
 		//收到消息之后不回复，先看看可以走通吗
 
 	}
