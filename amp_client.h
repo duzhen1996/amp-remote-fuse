@@ -203,7 +203,7 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
 
     //看看有没有段空间的申请。对于客户端来说，只有写文件需要申请并填充段空间
     if(fusemsg->page_size_now != 0){
-        err = __server_allocpages(fusemsg, &req->req_niov, &req->req_iov);
+        err = client_alloc_pages(fusemsg, &req->req_niov, &req->req_iov);
 		if (err < 0){
             printf("段空间申请失败\n");
         }
