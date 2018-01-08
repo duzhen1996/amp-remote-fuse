@@ -194,7 +194,7 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
     //然后开始发送
     req->req_msg = reqmsg;
     req->req_msglen = size;
-	req->req_need_ack = 0;
+	req->req_need_ack = 1;
 	req->req_resent = 0;
 	req->req_type = AMP_REQUEST|AMP_MSG;
     req->req_niov = 0;
@@ -217,9 +217,22 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
 			return err;
 	}
 
-    printf("消息发送完毕");
-    //尝试不接受回信
+    printf("消息发送完毕\n");
+    //现在接受
+	replymsg = req->req_reply;
+	fusemsg = (fuse_msg_t *)((char *)replymsg + AMP_MESSAGE_HEADER_LEN);
 
+	if(strcmp(fusemsg->path_name, "yes") == 0){
+		//这里说明操作成功了
+		printf("操作成功6666\n");
+		return 0;
+	} else if(strcmp(fusemsg->path_name, "no")==0){
+		printf("操作失败。。。。。\n");
+		return -1;
+	} else{
+		printf("传回来的是什么鬼\n");
+	}
+	
     return 0;
 }
 

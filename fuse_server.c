@@ -3,9 +3,18 @@
 
 #include "amp_kernal.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
+
 amp_comp_context_t  *this_ctxt;
 amp_lock_t          request_queue_lock;
 amp_sem_t           request_queue_sem;
+
+//注意创建目录
+static const char* ROOT_PATH = "/home/zhendu/server_root/";
 
 LIST_HEAD(request_queue);
 
@@ -24,6 +33,7 @@ int server_queue_req (amp_request_t *req)
 //我觉得直接从fuse_msg_t的byte来判断空间的分配比较好
 int server_alloc_pages (void *msg, amp_u32_t *niov, amp_kiov_t **iov)
 {
+	
     //用来暂存函数运行状态（错误码）
     int err = 0;
     
@@ -120,6 +130,78 @@ void server_free_pages (amp_u32_t num, amp_kiov_t **kiov)
 	return;
 }
 
+//向客户端发送结果，有必要的话需要返回一个buf，result = 1代表发送成功，=0代表发送失败
+int send_to_client(amp_request_t *req, int result, char* buf){
+	//根据结果修改返回请求的值
+	fuse_msg_t* fuse_msg = NULL;
+	fusemsg = (fuse_msg_t *)((char *)req->req_msg + AMP_MESSAGE_HEADER_LEN);
+
+	//先修改消息，返回yes
+	memset(fusemsg,0,sizeof(fuse_msg_t));
+	if(result == 1){
+		sprintf(fusemsg->path_name, "yes");
+	}else if(result == 0){
+		sprintf(fusemsg->path_name, "no");
+	}
+	
+	//然后修改包头，把信息的位置换一下，等等操作
+	req->req_reply = req->req_msg;
+	req->req_replylen = req->req_msglen;
+	req->msg=NULL;
+	req->msglen=0;
+	req->req_need_ack = 0;
+	req->req_resent = 0;
+	req->req_type = AMP_REPLY|AMP_MSG;
+    req->req_niov = 0;
+    req->req_iov = NULL;
+
+	//然后看看要不要进行段填充
+	if(!buf){
+		//有东西要传输
+	}
+
+	//然后把东西发回去
+	amp_send_sync(ctxt, req, req->req_remote_type, req->req_remote_id,0);
+
+	//回收空间
+	amp_free(req->req_reply, req->req_replylen);
+    __amp_free_request(req);
+}
+
+//创建一个函数来处理请求
+int slove_request(amp_request_t *req){
+	
+	char* tmp_path_name = NULL;
+	
+	//根据请求类型处理
+	//这里处理新增文件的请求
+	//首先先把自定义消息那里拿出来
+	fuse_msg_t* fuse_msg = NULL;
+	
+	fusemsg = (fuse_msg_t *)((char *)req->req_msg + AMP_MESSAGE_HEADER_LEN);
+	
+	//指向路径名字符串的指针
+	tmp_path_name = fusemsg->path_name;
+	if(fusemsg->path_name[0] == '/'){
+		tmp_path_name = tmp_path_name + 1;
+	}
+
+	//用一个指针来存储真正的路径
+	char dest_path[512];
+	strcpy(dest_path, ROOT_PATH);
+	strcat(str, tmp_path_name);
+
+	if(fuse_msg->type == 0){
+		printf("处理一个文件创建请求\n");
+
+		//创建一个权限完全开放的文件
+		//注意是0777来表示这个是8进制数字
+		res = open(dest_path, O_CREAT | O_EXCL | O_WRONLY, 0777);
+		if (res >= 0)
+			res = close(res);
+		
+	}
+}
 
 //main函数
 int main(){
