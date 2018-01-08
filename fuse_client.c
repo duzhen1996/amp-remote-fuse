@@ -10,6 +10,8 @@
 #include <dirent.h>
 #include "metadata.h"
 #include "amp_kernal.h"
+#include "amp_client.h"
+#include <memory.h>
 
 //读一个目录中的内容
 static int amp_readdir(const char* path, void* buf, fuse_fill_dir_t filler,
@@ -98,6 +100,20 @@ int main(int argc, char* argv[])
     printf("开始运行\n");
     init_metadata_table(meta_table_point);
 
-    return fuse_main(argc, argv, &oufs_ops, NULL);
+    fuse_msg_t* fusemsg = (fuse_msg_t *)malloc(sizeof(fuse_msg_t));
+    memset(fusemsg, 0, sizeof(fuse_msg_t));
+    
+    fusemsg->type = 0;
+    fusemsg->path_name = "hello";
+    fusemsg->length = 0;
+    fusemsg->bytes = 0;
+    fusemsg->offset = 0;
+    fusemsg->page_size_now = 0;
+    
+    void* buf = NULL;
+    send_to_server(fusemsg, buf);
+
+    return 0;
+    //return fuse_main(argc, argv, &oufs_ops, NULL);
     //printf("运行结束\n");
 }

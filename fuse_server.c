@@ -11,7 +11,7 @@ LIST_HEAD(request_queue);
 
 //服务器端吉祥三宝的实现，要在连接的时候传入的函数
 //这个函数处理传统信息，
-int __queue_req (amp_request_t *req)
+int server_queue_req (amp_request_t *req)
 {
 	amp_lock(&request_queue_lock);
 	list_add_tail(&req->req_list, &request_queue);
@@ -21,7 +21,8 @@ int __queue_req (amp_request_t *req)
 }
 
 //段分配函数
-int __alloc_pages (void *msg, amp_u32_t *num, amp_kiov_t **iov)
+//我觉得直接从fuse_msg_t的byte来判断空间的分配比较好
+int server_alloc_pages (void *msg, amp_u32_t *num, amp_kiov_t **iov)
 {
     //用来暂存函数运行状态（错误码）
     int err = 0;
@@ -52,7 +53,7 @@ int __alloc_pages (void *msg, amp_u32_t *num, amp_kiov_t **iov)
 
 	//通过我们自己构造的消息内容来判断需要几个页
 	fusemsg = (fuse_msg_t *)msg;
-	if(fusemsg->type == 0 || fusemsg->type == 3){
+	if(fusemsg->page_size_now == 0){
 		//这里分别是文件的创建和truncate操作
 		page_num = 0;
 	}else{
@@ -74,7 +75,7 @@ int __alloc_pages (void *msg, amp_u32_t *num, amp_kiov_t **iov)
 		//为所有的段申请的大空间初始化，这是申请空间所必须附带的操作
 		memset(kiov, 0, sizeof(amp_kiov_t) * page_num);
 		
-		size_t page_size = fusemsg->bytes;
+		size_t page_size = fusemsg->page_size_now;
 		//为每个段数据存储分别分配空间，其实就是为ak_addr分配空间
 		//为了简化操作，我们只申请一页
 		for(i = 0 ; i < page_num ; i++){
@@ -110,7 +111,7 @@ int __alloc_pages (void *msg, amp_u32_t *num, amp_kiov_t **iov)
 }
 
 //段回收
-void __free_pages (amp_u32_t num, amp_kiov_t **kiov)
+void server_free_pages (amp_u32_t num, amp_kiov_t **kiov)
 {
 	int i;
     amp_kiov_t * kiovt = *kiov;
@@ -150,9 +151,9 @@ int main(){
 				    SERVER_PORT,
 				    AMP_CONN_TYPE_TCP,
 				    AMP_CONN_DIRECTION_LISTEN,
-				    __queue_req,
-				    __alloc_pages,
-				    __free_pages);
+				    server_queue_req,
+				    server_alloc_pages,
+				    server_free_pages);
 	if (err < 0) {
 		printf("连接初始化失败, err:%d\n", err);
 		amp_sys_finalize(this_ctxt);
@@ -179,13 +180,12 @@ int main(){
 		
 		//取出消息
 		msg_get = (fuse_msg_t *)((char *)req->req_msg + AMP_MESSAGE_HEADER_LEN);
-		printf("[main]type:%d, len:%d, msg:%s\n", msgp->type, msgp->bytes, msgp->path_name);
+		printf("收到了消息[main]type:%d, len:%d, msg:%s\n", msgp->type, msgp->bytes, msgp->path_name);
 		amp_free(req->req_msg, req->req_msglen);
 		__amp_free_request(req);
-
 		//根据消息，分别处理
-
-		continue;
+		//收到消息之后不回复，先看看可以走通吗
+		
 	}
 
 	return 0;
