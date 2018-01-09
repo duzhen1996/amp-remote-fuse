@@ -45,12 +45,14 @@ static int amp_readdir(const char* path, void* buf, fuse_fill_dir_t filler,
             break;
         }else{
             printf("找到一条元数据\n");
-            filler(buf, meta_en[i].path_name, meta_en[i].meta,0);
+            //看看元数据里面有没有东西
+            printf("pathname:%s,meta->mode:%d", meta_en[i].path_name, meta_en[i].meta->st_mode);
+            //传入的东西不能有斜杠，太可怕了
+            filler(buf, meta_en[i].path_name+1, meta_en[i].meta ,0);
         }
     }
 
-    return filler(buf, "凑数", NULL, 0);
-
+    // return filler(buf, "凑数", NULL, 0);
     return 0;
 }
 
@@ -70,6 +72,7 @@ static int amp_getattr(const char* path, struct stat* st)
     printf("查看文件类型\n");
     if (strcmp(path, "/") == 0){
         st->st_mode = 0755 | S_IFDIR;
+        return 0;
     }else{
         for(i = 0; i < META_TABLE_SIZE; i++){
             //如果两个指针都是0，那就退出
@@ -86,13 +89,12 @@ static int amp_getattr(const char* path, struct stat* st)
                 }
             }
         }
-        //保证权限与类型
-        st->st_mode = 0644 | S_IFREG;
     }
     
     //搜索元数据
     if(judge == -1){
-        return -errno;
+        printf("并没有找到相关数据\n");
+        return -ENOENT;
     }
 
     return 0;
@@ -102,6 +104,7 @@ static int amp_getattr(const char* path, struct stat* st)
 <br/>
 
 主要的过程就是遍历元数据表就好了，整体实现不涉及通信，还是比较简单的。下一步就是完成文件的创建，这个过程涉及到通信，所以我们我们先要写一个通信函数，这个函数的内容就是往服务器发一个文件名，告诉服务器要创建一个这个文件名的空文件。并且为元数据表添加一条元数据。
+在这个函数里面有一个非常重要的坑，那就是`filler(buf, meta_en[i].path_name+1, meta_en[i].meta ,0);`这个的路径名是不能带斜杠`/`的，带了就会出错。
 
 
 ## 完成文件的创建
@@ -119,6 +122,9 @@ static int amp_getattr(const char* path, struct stat* st)
 //后两个的包中带一个page
 //
 //此外还有读写的范围
+//此外，我们还需要一个空间来接受返回的元数据，对于数据的任何操作几乎都需要返回一个文件的元数据
+//因为坚持将元数据从服务器端脱离出来，所以我们需要在不是服务器的地方管理元数据
+//我们将元数据从服务器端拿回来，重新修改mode和gid、uid即可。
 struct __fuse_msg {
 	int type;
 	char path_name[512];
@@ -129,20 +135,36 @@ struct __fuse_msg {
     off_t offset;
     //这里存着当前发送需要的段大小
     size_t page_size_now;
+    
+    struct stat server_stat;
 };
 typedef struct __fuse_msg  fuse_msg_t;
 ```
-然后我们设计一下客户端的传输接口，先进行message的传输。
+然后我们设计一下客户端的传输接口，先进行message的传输。真个touch的过程是这样的，首先遍历当前目录下所有的文件，然后查看要touch的文件是不是存在了，如果存在，那就直接就该文件的时间，如果不存在，那就新建一个文件。对于查看一个文件是不是存在的amp_getattr来说，我们要给FUSE一个他看得懂的返回值来搞定，就像下面这样。
+
+```C
+    //搜索元数据
+    if(judge == -1){
+        printf("并没有找到相关数据\n");
+        return -ENOENT;
+    }
+    return 0;
+```
 
 <br/>
 现在要考虑的就是这个函数应该怎么设计，主要传入的就是上面的这个结构体和一个buf缓冲空间的指针，page的大小可以按照结构体的bytes来设定。
 对于读写来说，目标就是修改buf。此外元数据的修改也要注意。
+
+实际的文件创建是在服务器端的，我们告诉服务器要创建的文件名就好了。
 
 ## 服务器的设计
 我们做一个单线程服务器即可，多线程会有临界变量的问题，需要处理，所以单线程是最为保险的。我们将amp段的大小设成客户端一次所需的大小：
 ```C
 size_t page_size = fusemsg->bytes;
 ```
-段数量固定为一个。
+段数量固定为一个。服务器的工作分为三块。
+首先就是接受信息，通过消息中的type来获取操作的类型，利用本地接口完成对应操作之后操作的结果以及对于对应文件操作之后那个文件新的元数据。在服务器端的文件都会被开放到最大的权限来保证服务器端进程的有效访问。真正的权限信息（mode，gid，uid）放到在客户端上。当元数据传回客户端的时候客户端才会依照实际的情况来搞定权限信息的问题。
+
+
 
 

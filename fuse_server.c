@@ -134,12 +134,15 @@ void server_free_pages (amp_u32_t num, amp_kiov_t **kiov)
 int send_to_client(amp_request_t *req, int result, char* buf){
 	struct stat file_metadata;
 
+	
+
 	//根据结果修改返回请求的值
 	fuse_msg_t* fusemsg = NULL;
 	fusemsg = (fuse_msg_t *)((char *)req->req_msg + AMP_MESSAGE_HEADER_LEN);
 	file_metadata = fusemsg->server_stat;
 	//先修改消息，返回yes
-	//我觉得这个是一个罪魁祸首的操作，把同样有用的元数据给置0了
+	//我觉得这个是一个罪魁祸首的操作，把同样有用的元数据给置0了，此外这里把非常重要的size参数也给清零了
+	
 	memset(fusemsg,0,sizeof(fuse_msg_t));
 	//然后把元数据放回去
 	fusemsg->server_stat = file_metadata;
@@ -166,6 +169,7 @@ int send_to_client(amp_request_t *req, int result, char* buf){
 		//有东西要传输
 		//首先申请空间
 		//只有读文件要使用这个缓冲区
+		//所以大小设置为读的大小
 		
 	}
 
