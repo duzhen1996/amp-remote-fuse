@@ -139,10 +139,22 @@ static int amp_create(const char* path, mode_t mode, struct fuse_file_info* fi)
     return 0;
 }
 
+static int amp_unlink(const char* path)
+{
+    return 0;
+}
+
+static int amp_utimens(const char *path, const struct timespec ts[2])
+{
+	return 0;
+}
+
 static struct fuse_operations oufs_ops = {
     .getattr    =   amp_getattr,
     .readdir    =   amp_readdir,
     .create     =   amp_create,
+    .unlink     =   amp_unlink,
+    .utimens	=   amp_utimens,
 };
 
 int main(int argc, char* argv[])
