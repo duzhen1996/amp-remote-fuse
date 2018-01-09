@@ -40,7 +40,7 @@ static int amp_readdir(const char* path, void* buf, fuse_fill_dir_t filler,
         }
     }
 
-    return filler(buf, "凑数", NULL, 0);
+    // return filler(buf, "凑数", NULL, 0);
 
     return 0;
 }
