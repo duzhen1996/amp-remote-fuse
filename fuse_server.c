@@ -135,7 +135,7 @@ int send_to_client(amp_request_t *req, int result, char* buf){
 	//根据结果修改返回请求的值
 	fuse_msg_t* fusemsg = NULL;
 	fusemsg = (fuse_msg_t *)((char *)req->req_msg + AMP_MESSAGE_HEADER_LEN);
-
+	printf("在交换数据之前之前，mode:%d\n",fusemsg->server_stat.st_mode);
 	//先修改消息，返回yes
 	memset(fusemsg,0,sizeof(fuse_msg_t));
 	if(result == 1){
