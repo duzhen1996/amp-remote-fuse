@@ -228,6 +228,8 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
 		printf("操作成功6666\n");
 		//将收到的数据放回去
 		*msg = *fusemsg;
+		//在这里看看数据是不是改了
+		printf("mode:%d\n",msg->server_stat.st_mode);
 		return 0;
 	} else if(strcmp(fusemsg->path_name, "no")==0){
 		printf("操作失败。。。。。\n");

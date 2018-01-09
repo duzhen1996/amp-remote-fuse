@@ -211,8 +211,9 @@ int slove_request(amp_request_t *req){
 			struct stat meta;
 			memset(&meta, 0, sizeof(struct stat));
 			res = lstat(dest_path, &meta);
-			printf("err:%d,mode:%d\n",res,meta.st_mode);
+			
 			fusemsg->server_stat = meta;
+			printf("err:%d,mode:%d\n",res,fusemsg->server_stat.st_mode);
 			send_to_client(req,1,NULL);
 		}else{
 			printf("文件创建失败");
