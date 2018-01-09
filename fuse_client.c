@@ -22,7 +22,7 @@ static int amp_readdir(const char* path, void* buf, fuse_fill_dir_t filler,
     metadata_entry_t* meta_en = NULL;
 
     printf("查看是不是根目录\n");
-    //因为没有path的设定，所以只要不是跟目录的就报错
+    因为没有path的设定，所以只要不是跟目录的就报错
     if (strcmp(path, "/") != 0)
 		return -ENOENT;
     
@@ -82,7 +82,8 @@ static int amp_getattr(const char* path, struct stat* st)
     
     //搜索元数据
     if(judge == -1){
-        return -errno;
+        printf("并没有找到相关数据\n");
+        return judge;
     }
 
     return 0;
