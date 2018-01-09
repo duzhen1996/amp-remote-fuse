@@ -151,17 +151,17 @@ int main(int argc, char* argv[])
     printf("开始运行\n");
     init_metadata_table(meta_table_point);
 
-    fuse_msg_t* fusemsg = (fuse_msg_t *)malloc(sizeof(fuse_msg_t));
-    memset(fusemsg, 0, sizeof(fuse_msg_t));
+    // fuse_msg_t* fusemsg = (fuse_msg_t *)malloc(sizeof(fuse_msg_t));
+    // memset(fusemsg, 0, sizeof(fuse_msg_t));
 
-    sprintf(fusemsg->path_name, "Hello");
+    // sprintf(fusemsg->path_name, "Hello");
     
-    void* buf = NULL;
-    send_to_server(fusemsg, buf);
-    printf("mode:%d\n", fusemsg->server_stat.st_mode);
-    insert_metadata_table(&(fusemsg->path_name), &(fusemsg->server_stat));
-
-    return 0;
-    //return fuse_main(argc, argv, &oufs_ops, NULL);
+    // void* buf = NULL;
+    // send_to_server(fusemsg, buf);
+    // printf("mode:%d\n", fusemsg->server_stat.st_mode);
+    // insert_metadata_table(&(fusemsg->path_name), &(fusemsg->server_stat));
+    // 
+    // return 0;
+    return fuse_main(argc, argv, &oufs_ops, NULL);
     //printf("运行结束\n");
 }
