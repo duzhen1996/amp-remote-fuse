@@ -61,6 +61,7 @@ static int amp_getattr(const char* path, struct stat* st)
     printf("查看文件类型\n");
     if (strcmp(path, "/") == 0){
         st->st_mode = 0755 | S_IFDIR;
+        return 0;
     }else{
         for(i = 0; i < META_TABLE_SIZE; i++){
             //如果两个指针都是0，那就退出
@@ -77,8 +78,6 @@ static int amp_getattr(const char* path, struct stat* st)
                 }
             }
         }
-        //保证权限与类型
-        st->st_mode = 0777 | S_IFREG;
     }
     
     //搜索元数据
@@ -91,6 +90,7 @@ static int amp_getattr(const char* path, struct stat* st)
 
 static int amp_create(const char* path, mode_t mode, struct fuse_file_info* fi)
 {
+    printf("创建一个新文件");
     // struct ou_entry* o;
     // struct list_node* n;
 
