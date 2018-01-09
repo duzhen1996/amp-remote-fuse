@@ -36,12 +36,13 @@ static int amp_readdir(const char* path, void* buf, fuse_fill_dir_t filler,
             break;
         }else{
             printf("找到一条元数据\n");
+            //看看元数据里面有没有东西
+            printf("pathname:%s,meta->mode:%d", meta_en[i].path_name, meta_en[i].meta->st_mode);
             filler(buf, meta_en[i].path_name, meta_en[i].meta ,0);
         }
     }
 
-    return filler(buf, "凑数", NULL, 0);
-
+    // return filler(buf, "凑数", NULL, 0);
     return 0;
 }
 
@@ -128,6 +129,8 @@ static int amp_create(const char* path, mode_t mode, struct fuse_file_info* fi)
     }
 
     //修改元数据
+    //查看传回的文件权限
+    printf("查看传回的文件权限:%d\n", fusemsg.server_stat.st_mode)
     fusemsg.server_stat.st_mode = mode;
     fusemsg.server_stat.st_uid = getuid();
     fusemsg.server_stat.st_gid = getgid();

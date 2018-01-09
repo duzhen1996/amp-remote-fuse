@@ -71,6 +71,9 @@ void insert_metadata_table(const char* path, struct stat *input_meta){
             //将元数据拷贝进来
             memcpy(metatable[i].meta, input_meta, sizeof(struct stat));
 
+            //数据插入的时候看看是不是对的
+            printf("插入元数据表：%d\n", metatable[i].meta->st_mode);
+
             printf("完成元数据的插入\n");
             break;
         }
