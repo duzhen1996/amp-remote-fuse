@@ -208,7 +208,11 @@ int slove_request(amp_request_t *req){
 			printf("文件创建成功\n");
 			res = close(res);
 			//取到元数据传回
-			lstat(dest_path, &(fusemsg->server_stat));
+			struct stat meta;
+			memset(&meta, 0, sizeof(struct stat));
+			res = lstat(dest_path, &meta);
+			printf("err:%d,mode:%d\n",err,meta.st_mode);
+			*fusemsgs = meta;
 			send_to_client(req,1,NULL);
 		}else{
 			printf("文件创建失败");
