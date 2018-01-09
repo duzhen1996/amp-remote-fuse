@@ -211,7 +211,7 @@ int slove_request(amp_request_t *req){
 			struct stat meta;
 			memset(&meta, 0, sizeof(struct stat));
 			res = lstat(dest_path, &meta);
-			printf("err:%d,mode:%d\n",err,meta.st_mode);
+			printf("err:%d,mode:%d\n",res,meta.st_mode);
 			*fusemsgs = meta;
 			send_to_client(req,1,NULL);
 		}else{
