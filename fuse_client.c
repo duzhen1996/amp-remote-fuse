@@ -83,7 +83,7 @@ static int amp_getattr(const char* path, struct stat* st)
     //搜索元数据
     if(judge == -1){
         printf("并没有找到相关数据\n");
-        return judge;
+        return -ENOENT;
     }
 
     return 0;
