@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
     
     void* buf = NULL;
     send_to_server(fusemsg, buf);
-    printf("mode:%d\n", fusemsg->mode);
+    printf("mode:%d\n", fusemsg->server_stat.mode);
     insert_metadata_table(&(fusemsg->path_name), &(fusemsg->server_stat));
 
     return 0;
