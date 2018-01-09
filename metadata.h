@@ -46,7 +46,7 @@ void init_metadata_table(){
 }
 
 //用一个函数来插入一条元数据
-void insert_metadata_table(char* path, struct stat *input_meta){
+void insert_metadata_table(const char* path, struct stat *input_meta){
     //循环计数变量
     int i;
     
@@ -65,7 +65,7 @@ void insert_metadata_table(char* path, struct stat *input_meta){
             strcpy(metatable[i].path_name, path);
             
             //将元数据结构体拷贝进来
-            metatable[i].meta = (char *)malloc(sizeof(struct stat));
+            metatable[i].meta = (struct stat *)malloc(sizeof(struct stat));
             //初始化空间
             memset(metatable[i].meta, 0, sizeof(struct stat));
             //将元数据拷贝进来
