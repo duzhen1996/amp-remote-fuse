@@ -122,8 +122,8 @@ static int amp_create(const char* path, mode_t mode, struct fuse_file_info* fi)
     send_to_server(&fusemsg, NULL);
 
     //获取返回的元数据
-    if(!fusemsg.server_stat){
-        printf("蛤？元数据没有传回来？\n")
+    if(!fusemsg.server_stat.st_mode){
+        printf("蛤？元数据没有传回来？\n");
     }
 
     //修改元数据
@@ -165,8 +165,8 @@ int main(int argc, char* argv[])
     
     void* buf = NULL;
     send_to_server(fusemsg, buf);
-    printf("mode:%d\n", fusemsg->server_stat->st_mode);
-    insert_metadata_table(path, &(fusemsg->server_stat));
+    printf("mode:%d\n", fusemsg->server_stat.st_mode);
+    insert_metadata_table(&(fusemsgs->path_name), &(fusemsg->server_stat));
 
     return 0;
     //return fuse_main(argc, argv, &oufs_ops, NULL);

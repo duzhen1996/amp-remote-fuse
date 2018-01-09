@@ -62,14 +62,14 @@ void insert_metadata_table(char* path, struct stat *input_meta){
             //重置申请的空间
             memset(metatable[i].path_name,0,512);
             //将路径拷进来
-            memcpy(metatable[i].path_name, path);
+            strcpy(metatable[i].path_name, path);
             
             //将元数据结构体拷贝进来
             metatable[i].meta = (char *)malloc(sizeof(struct stat));
             //初始化空间
             memset(metatable[i].meta, 0, sizeof(struct stat));
             //将元数据拷贝进来
-            memcpy(metatable[i].meta, input_meta);
+            memcpy(metatable[i].meta, input_meta, sizeof(struct stat));
 
             printf("完成元数据的插入");
             break;
