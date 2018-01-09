@@ -27,7 +27,7 @@ OBJS = fuse_client.o fuse_server.o
 		${CC} -Wall -D_FILE_OFFSET_BITS=64 -I/usr/local/include/fuse -L/usr/local/lib -lfuse -pthread -ldl ${CFLAGS} ${EXTRA_CFLAGS} -g -c $*.c
 
 fuse_client: fuse_client.o
-		${CC} -O2 -g -o $@ ${CLIENT_OBJ} ${LDFLAGS} ${LDFLAGS_AMP}
+		${CC} -O2 -g -o $@ ${CLIENT_OBJ} ${LDFLAGS} ${LDFLAGS_AMP} -lrt -lm -lpthread
 
 fuse_server: fuse_server.o
 		${CC} -O2 -g -o $@ ${SERVER_OBJ} ${LDFLAGS} ${LDFLAGS_AMP}

@@ -36,11 +36,11 @@ static int amp_readdir(const char* path, void* buf, fuse_fill_dir_t filler,
             break;
         }else{
             printf("找到一条元数据\n");
-            filler(buf, meta_en[i].path_name, meta_en[i].meta,0);
+            filler(buf, meta_en[i].path_name, meta_en[i].meta ,0);
         }
     }
 
-    // return filler(buf, "凑数", NULL, 0);
+    return filler(buf, "凑数", NULL, 0);
 
     return 0;
 }
