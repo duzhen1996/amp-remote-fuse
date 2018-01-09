@@ -132,12 +132,18 @@ void server_free_pages (amp_u32_t num, amp_kiov_t **kiov)
 
 //向客户端发送结果，有必要的话需要返回一个buf，result = 1代表发送成功，=0代表发送失败
 int send_to_client(amp_request_t *req, int result, char* buf){
+	struct stat file_metadata;
+
 	//根据结果修改返回请求的值
 	fuse_msg_t* fusemsg = NULL;
 	fusemsg = (fuse_msg_t *)((char *)req->req_msg + AMP_MESSAGE_HEADER_LEN);
-	printf("在交换数据之前之前，mode:%d\n",fusemsg->server_stat.st_mode);
+	file_metadata = fusemsg->server_stat;
 	//先修改消息，返回yes
+	//我觉得这个是一个罪魁祸首的操作，把同样有用的元数据给置0了
 	memset(fusemsg,0,sizeof(fuse_msg_t));
+	//然后把元数据放回去
+	fusemsg->server_stat = file_metadata;
+	
 	if(result == 1){
 		sprintf(fusemsg->path_name, "yes");
 	}else if(result == 0){

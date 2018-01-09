@@ -36,7 +36,7 @@ struct __fuse_msg {
     off_t offset;
     //这里存着当前发送需要的段大小
     size_t page_size_now;
-    //从服务器端传来的元数据
+    
     struct stat server_stat;
 };
 typedef struct __fuse_msg  fuse_msg_t;
