@@ -226,9 +226,13 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
 	if(strcmp(fusemsg->path_name, "yes") == 0){
 		//这里说明操作成功了
 		printf("操作成功6666\n");
+		//将收到的数据放回去
+		*msg = *fusemsg;
 		return 0;
 	} else if(strcmp(fusemsg->path_name, "no")==0){
 		printf("操作失败。。。。。\n");
+		//将收到的数据放回去
+		*msg = *fusemsg;
 		return -1;
 	} else{
 		printf("传回来的是什么鬼\n");
