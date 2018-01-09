@@ -78,7 +78,7 @@ static int amp_getattr(const char* path, struct stat* st)
             }
         }
         //保证权限与类型
-        st->st_mode = 0644 | S_IFREG;
+        st->st_mode = 0777 | S_IFREG;
     }
     
     //搜索元数据
@@ -89,9 +89,60 @@ static int amp_getattr(const char* path, struct stat* st)
     return 0;
 }
 
+static int amp_create(const char* path, mode_t mode, struct fuse_file_info* fi)
+{
+    // struct ou_entry* o;
+    // struct list_node* n;
+
+    //首先先添加一定的元数据
+    
+
+    // if (strlen(path + 1) > MAX_NAMELEN)
+    //     return -ENAMETOOLONG;
+
+    // list_for_each (n, &entries) {
+    //     o = list_entry(n, struct ou_entry, node);
+    //     if (strcmp(path + 1, o->name) == 0)
+    //         return -EEXIST;
+    // }
+
+    // o = malloc(sizeof(struct ou_entry));
+    // strcpy(o->name, path + 1); /* skip leading '/' */
+    // o->mode = mode | S_IFREG;
+    // list_add_prev(&o->node, &entries);
+    //打包信息
+    fuse_msg_t fusemsg;
+    //初始化
+    memset(&fusemsg, 0, sizeof(fuse_msg_t));
+
+    fusemsg.type = 0;
+    strcpy(fusemsg.path_name, path);
+
+    //发送消息
+    send_to_server(&fusemsg, NULL);
+
+    //获取返回的元数据
+    if(!fusemsg.server_stat){
+        printf("蛤？元数据没有传回来？\n")
+    }
+
+    //修改元数据
+    fusemsg.server_stat.st_mode = mode;
+    fusemsg.server_stat.st_uid = getuid();
+    fusemsg.server_stat.st_gid = getgid();
+
+    //插入一条元数据
+    insert_metadata_table(path, &fusemsg.server_stat);
+    
+    printf("创建文件处理完毕\n");
+
+    return 0;
+}
+
 static struct fuse_operations oufs_ops = {
     .getattr    =   amp_getattr,
     .readdir    =   amp_readdir,
+    .create     =   amp_create,
 };
 
 int main(int argc, char* argv[])
@@ -114,6 +165,8 @@ int main(int argc, char* argv[])
     
     void* buf = NULL;
     send_to_server(fusemsg, buf);
+    printf("mode:%d\n", fusemsg->server_stat->st_mode);
+    insert_metadata_table(path, &(fusemsg->server_stat));
 
     return 0;
     //return fuse_main(argc, argv, &oufs_ops, NULL);

@@ -233,6 +233,9 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
 	} else{
 		printf("传回来的是什么鬼\n");
 	}
+
+	//将收到的数据放回去
+	*msg = *fusemsg;
 	
     return 0;
 }

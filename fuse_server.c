@@ -147,8 +147,8 @@ int send_to_client(amp_request_t *req, int result, char* buf){
 	//然后修改包头，把信息的位置换一下，等等操作
 	req->req_reply = req->req_msg;
 	req->req_replylen = req->req_msglen;
-	req->req_msg=NULL;
-	req->req_msglen=0;
+	req->req_msg = NULL;
+	req->req_msglen = 0;
 	req->req_need_ack = 0;
 	req->req_resent = 0;
 	req->req_type = AMP_REPLY|AMP_MSG;
@@ -158,6 +158,9 @@ int send_to_client(amp_request_t *req, int result, char* buf){
 	//然后看看要不要进行段填充
 	if(!buf){
 		//有东西要传输
+		//首先申请空间
+		//只有读文件要使用这个缓冲区
+		
 	}
 
 	//然后把东西发回去
@@ -204,6 +207,8 @@ int slove_request(amp_request_t *req){
 		if (res >= 0){
 			printf("文件创建成功\n");
 			res = close(res);
+			//取到元数据传回
+			lstat(dest_path, &(fusemsg->server_stat));
 			send_to_client(req,1,NULL);
 		}else{
 			printf("文件创建失败");

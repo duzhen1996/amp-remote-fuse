@@ -45,4 +45,36 @@ void init_metadata_table(){
     printf("元数据表初始化完毕\n");
 }
 
+//用一个函数来插入一条元数据
+void insert_metadata_table(char* path, struct stat *input_meta){
+    //循环计数变量
+    int i;
+    
+    //指向第一条元数据的指针
+    metadata_entry_t* metatable = *meta_table_point;
+
+    //首先找到空位置
+    for(i = 0; i < META_TABLE_SIZE; i++){
+        //找到两个指针都是空指针的
+        if(metatable[i].path_name == 0 && metatable[i].meta == 0){
+            printf("在表中找到的空余位置");
+            metatable[i].path_name = (char *)malloc(512);
+            //重置申请的空间
+            memset(metatable[i].path_name,0,512);
+            //将路径拷进来
+            memcpy(metatable[i].path_name, path);
+            
+            //将元数据结构体拷贝进来
+            metatable[i].meta = (char *)malloc(sizeof(struct stat));
+            //初始化空间
+            memset(metatable[i].meta, 0, sizeof(struct stat));
+            //将元数据拷贝进来
+            memcpy(metatable[i].meta, input_meta);
+
+            printf("完成元数据的插入");
+            break;
+        }
+    }
+}
+
 #endif

@@ -23,6 +23,9 @@ int server_id = SERVER_ID1;
 //后两个的包中带一个page
 //
 //此外还有读写的范围
+//此外，我们还需要一个空间来接受返回的元数据，对于数据的任何操作几乎都需要返回一个文件的元数据
+//因为坚持将元数据从服务器端脱离出来，所以我们需要在不是服务器的地方管理元数据
+//我们将元数据从服务器端拿回来，重新修改mode和gid、uid即可。
 struct __fuse_msg {
 	int type;
 	char path_name[512];
@@ -33,6 +36,8 @@ struct __fuse_msg {
     off_t offset;
     //这里存着当前发送需要的段大小
     size_t page_size_now;
+    //从服务器端传来的元数据
+    struct stat server_stat;
 };
 typedef struct __fuse_msg  fuse_msg_t;
 
