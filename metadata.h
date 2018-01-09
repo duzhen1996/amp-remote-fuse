@@ -57,7 +57,7 @@ void insert_metadata_table(const char* path, struct stat *input_meta){
     for(i = 0; i < META_TABLE_SIZE; i++){
         //找到两个指针都是空指针的
         if(metatable[i].path_name == 0 && metatable[i].meta == 0){
-            printf("在表中找到的空余位置");
+            printf("在表中找到的空余位置\n");
             metatable[i].path_name = (char *)malloc(512);
             //重置申请的空间
             memset(metatable[i].path_name,0,512);
@@ -71,7 +71,7 @@ void insert_metadata_table(const char* path, struct stat *input_meta){
             //将元数据拷贝进来
             memcpy(metatable[i].meta, input_meta, sizeof(struct stat));
 
-            printf("完成元数据的插入");
+            printf("完成元数据的插入\n");
             break;
         }
     }
