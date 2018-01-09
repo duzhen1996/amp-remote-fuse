@@ -40,7 +40,7 @@ static int amp_readdir(const char* path, void* buf, fuse_fill_dir_t filler,
             printf("pathname:%s,meta->mode:%d", meta_en[i].path_name, meta_en[i].meta->st_mode);
             //后面没有结束符可能会导致严重问题，现在不知道为什么，但是加个`\0`试试
             meta_en[i].path_name[strlen(meta_en[i].path_name)] = '\0';
-            filler(buf, meta_en[i].path_name, meta_en[i].meta ,0);
+            filler(buf, "newtest123", meta_en[i].meta ,0);
         }
     }
 
