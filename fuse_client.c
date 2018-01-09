@@ -38,7 +38,7 @@ static int amp_readdir(const char* path, void* buf, fuse_fill_dir_t filler,
             printf("找到一条元数据\n");
             //看看元数据里面有没有东西
             printf("pathname:%s,meta->mode:%d", meta_en[i].path_name, meta_en[i].meta->st_mode);
-            filler(buf, "傻逼玩意", meta_en[i].meta->st_mode ,0);
+            filler(buf, "傻逼玩意", meta_en[i].meta ,0);
         }
     }
 
