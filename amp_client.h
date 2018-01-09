@@ -224,6 +224,7 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
 	fusemsg = (fuse_msg_t *)((char *)replymsg + AMP_MESSAGE_HEADER_LEN);
 
 	if(strcmp(fusemsg->path_name, "yes") == 0){
+		printf("mode:%d\n",fusemsg->server_stat.st_mode)
 		//这里说明操作成功了
 		printf("操作成功6666\n");
 		//将收到的数据放回去
