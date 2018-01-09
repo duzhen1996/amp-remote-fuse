@@ -163,6 +163,8 @@ int send_to_client(amp_request_t *req, int result, char* buf){
 		
 	}
 
+	//发之前看看元数据有没有带上
+	printf("在往回传之前，mode:%d\n",fusemsg->server_stat.st_mode);
 	//然后把东西发回去
 	amp_send_sync(this_ctxt, req, req->req_remote_type, req->req_remote_id,0);
 	

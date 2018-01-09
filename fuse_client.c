@@ -153,15 +153,8 @@ int main(int argc, char* argv[])
 
     fuse_msg_t* fusemsg = (fuse_msg_t *)malloc(sizeof(fuse_msg_t));
     memset(fusemsg, 0, sizeof(fuse_msg_t));
-    
-    fusemsg->type = 0;
 
     sprintf(fusemsg->path_name, "Hello");
-
-    fusemsg->length = 0;
-    fusemsg->bytes = 0;
-    fusemsg->offset = 0;
-    fusemsg->page_size_now = 0;
     
     void* buf = NULL;
     send_to_server(fusemsg, buf);
