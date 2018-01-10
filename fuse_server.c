@@ -304,7 +304,7 @@ int slove_request(amp_request_t *req){
 		struct stat meta;
 		memset(&meta, 0, sizeof(struct stat));
 		res = lstat(dest_path, &meta);
-		
+		fusemsg->page_size_now = fusemsg->bytes;
 		fusemsg->server_stat = meta;
 		printf("err:%d,mode:%d\n",res,fusemsg->server_stat.st_mode);
 		send_to_client(req,1,read_buf);
