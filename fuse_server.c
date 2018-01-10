@@ -169,7 +169,7 @@ int send_to_client(amp_request_t *req, int result, char* buf){
     req->req_iov = NULL;
 
 	//然后看看要不要进行段填充
-	if(buf_dize != 0){
+	if(buf_size != 0){
 		printf("有东西要传输\n");
 
 		//有东西要传输
