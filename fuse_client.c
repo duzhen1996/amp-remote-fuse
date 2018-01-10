@@ -178,6 +178,9 @@ static int amp_read(const char* path, char* buf, size_t bytes, off_t offset,
     //发送消息，直接把buf传进去，力图修改buf的值
     send_to_server(&fusemsg, buf);
 
+    //看看buf的东西拿到没有
+    printf("看看最后buf修改了没有:%d\n", buf);
+
     //将现有的mode取出来,
     res = get_metadata_by_pathname(path, &old_stat);
     
