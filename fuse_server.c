@@ -22,6 +22,7 @@ LIST_HEAD(request_queue);
 //这个函数处理传统信息，
 int server_queue_req (amp_request_t *req)
 {
+	printf("有东西将会加入到请求队列中\n");
 	amp_lock(&request_queue_lock);
 	list_add_tail(&req->req_list, &request_queue);
 	amp_unlock(&request_queue_lock);
