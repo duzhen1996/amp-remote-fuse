@@ -285,7 +285,7 @@ static int amp_truncate(const char *path, off_t size)
     strcpy(fusemsg.path_name, path);
 
     //发送消息
-    printf("准备发送截断消息给文件\n")
+    printf("准备发送截断消息给文件\n");
     send_to_server(&fusemsg, NULL);
 
     //获取返回的元数据
