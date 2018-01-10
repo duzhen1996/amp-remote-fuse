@@ -186,7 +186,7 @@ int send_to_client(amp_request_t *req, int result, char* buf){
 
 		//想分区中拷贝buf的内容
 		//将东西拷贝到段中
-		memcpy(req->iov, buf, req->niov);
+		memcpy(req->req_iov, buf, req->req_niov);
 
 		//修改包的类型
 		req->req_type = AMP_REPLY|AMP_DATA;
@@ -270,7 +270,6 @@ int slove_request(amp_request_t *req){
 		int fd;
 		int res;
 
-		(void) fi;
 		fd = open(dest_path, O_RDONLY);
 		if (fd == -1){
 			printf("读文件流打开失败");
@@ -287,7 +286,7 @@ int slove_request(amp_request_t *req){
 		if (res == -1)
 		{
 			//读文件失败
-			printf("读文件失败\n")
+			printf("读文件失败\n");
 			send_to_client(req,0,NULL);
 			res = -errno;
 		}
