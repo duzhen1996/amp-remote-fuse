@@ -339,6 +339,7 @@ int slove_request(amp_request_t *req){
 		printf("截断一个文件\n");
 		
 		res = truncate(dest_path, fusemsg->length);
+		
 		if (res == -1){
 			send_to_client(req, 0, NULL);
 			return -errno;
