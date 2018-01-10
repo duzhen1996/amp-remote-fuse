@@ -206,7 +206,8 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
     
 
     //看看有没有段空间的申请。对于客户端来说，只有写文件需要申请并填充段空间
-    if(input_buf != 0){
+	//读文件不需要在发送的时候申请段空间
+    if(fusemsg->page_size_now != 0){
 		printf("申请段空间\n");
         err = client_alloc_pages(fusemsg, &req->req_niov, &req->req_iov);
 		if (err < 0){
