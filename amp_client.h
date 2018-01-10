@@ -94,6 +94,7 @@ int client_alloc_pages (void *msg, amp_u32_t *niov, amp_kiov_t **iov)
 	//以上就是申请完段空间了
 	*iov = kiov;
     *niov = page_num;
+	printf("成功申请了段空间\n");
 	return 0;
 
 }
@@ -204,6 +205,7 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
 
     //看看有没有段空间的申请。对于客户端来说，只有写文件需要申请并填充段空间
     if(fusemsg->page_size_now != 0){
+		printf("申请段空间\n");
         err = client_alloc_pages(fusemsg, &req->req_niov, &req->req_iov);
 		if (err < 0){
             printf("段空间申请失败\n");
@@ -216,6 +218,7 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
     }
     
     //正式发送内容
+	printf("准备发送内容\n");
     err = amp_send_sync(clt_ctxt, req, SERVER, 1, 0);
     if (err < 0) {
 			printf("消息发送失败, err:%d\n", err);
@@ -249,7 +252,7 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
 			req->req_iov = NULL;
 			req->req_niov = 0;
 		}
-		
+
 		//回收空间
 		amp_free(req->req_reply, req->req_replylen);
 		__amp_free_request(req);

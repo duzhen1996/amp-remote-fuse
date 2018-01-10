@@ -210,6 +210,7 @@ static int amp_utimens(const char *path, const struct timespec ts[2])
 static int amp_write(const char *path, const char *buf, size_t size,
 		     off_t offset, struct fuse_file_info *fi)
 {
+    printf("准备写一个文件\n");
 	// int fd;
 	// int res;
 
@@ -239,6 +240,7 @@ static int amp_write(const char *path, const char *buf, size_t size,
     fusemsg.offset = offset;
     fusemsg.page_size_now = size;
 
+    printf("准备发送");
     //将buf的信息传进去，发送给服务器端
     send_to_server(&fusemsg, buf);
 
@@ -265,7 +267,7 @@ static int amp_write(const char *path, const char *buf, size_t size,
 static int amp_truncate(const char *path, off_t size)
 {
 	// int res;
-
+    printf("准备截断一个文件\n");
 	// res = truncate(path, size);
 	// if (res == -1)
 	// 	return -errno;
@@ -283,6 +285,7 @@ static int amp_truncate(const char *path, off_t size)
     strcpy(fusemsg.path_name, path);
 
     //发送消息
+    printf("准备发送截断消息给文件\n")
     send_to_server(&fusemsg, NULL);
 
     //获取返回的元数据
