@@ -168,8 +168,6 @@ int send_to_client(amp_request_t *req, int result, char* buf){
     req->req_niov = 0;
     req->req_iov = NULL;
 
-	printf("看看传入的指针%d", buf);
-
 	//然后看看要不要进行段填充
 	if(fusemsg->page_size_now != 0){
 		printf("有东西要传输\n");
@@ -302,6 +300,13 @@ int slove_request(amp_request_t *req){
 
 		//这里就读到了对应文件
 		//把东西传回去
+		//取到元数据传回
+		struct stat meta;
+		memset(&meta, 0, sizeof(struct stat));
+		res = lstat(dest_path, &meta);
+		
+		fusemsg->server_stat = meta;
+		printf("err:%d,mode:%d\n",res,fusemsg->server_stat.st_mode);
 		send_to_client(req,1,read_buf);
 		
 		return res;
@@ -329,12 +334,19 @@ int slove_request(amp_request_t *req){
 			send_to_client(req, 0, NULL);
 			res = -errno;
 		}
-
+		close(fd);
 		//这里将结果反馈回去
 		//写一个文件就不需要反馈任何文件了
+		//将取到的元数据返回
+		//取到元数据传回
+		struct stat meta;
+		memset(&meta, 0, sizeof(struct stat));
+		res = lstat(dest_path, &meta);
+		
+		fusemsg->server_stat = meta;
+		printf("err:%d,mode:%d\n",res,fusemsg->server_stat.st_mode);
 		send_to_client(req, 1, NULL);
 		
-		close(fd);
 		return res;
 	}
 
@@ -348,7 +360,14 @@ int slove_request(amp_request_t *req){
 			send_to_client(req, 0, NULL);
 			return -errno;
 		}
+	
+		//取到元数据传回
+		struct stat meta;
+		memset(&meta, 0, sizeof(struct stat));
+		res = lstat(dest_path, &meta);
 		
+		fusemsg->server_stat = meta;
+		printf("err:%d,mode:%d\n",res,fusemsg->server_stat.st_mode);
 		send_to_client(req, 1, NULL);
 		
 		return 0;
