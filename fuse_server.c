@@ -137,23 +137,28 @@ int send_to_client(amp_request_t *req, int result, char* buf){
 	int err = 0;
 	struct stat file_metadata;
 	int buf_size = 0;
+	int return_val = 0;
 
 	//根据结果修改返回请求的值
 	fuse_msg_t* fusemsg = NULL;
 	fusemsg = (fuse_msg_t *)((char *)req->req_msg + AMP_MESSAGE_HEADER_LEN);
 	file_metadata = fusemsg->server_stat;
+	return_val = fusemsg->return_num;
 	//段空间可能的大小
 	if(fusemsg->type == 1){
 		//如果是读文件的操作，服务器端要准备申请空间了
 		buf_size = fusemsg->bytes;
 	}
+
+	
 	
 	//先修改消息，返回yes
 	//我觉得这个是一个罪魁祸首的操作，把同样有用的元数据给置0了，此外这里把非常重要的size参数也给清零了
 	memset(fusemsg,0,sizeof(fuse_msg_t));
 	//然后把元数据放回去
 	fusemsg->server_stat = file_metadata;
-	
+	fusemsg->return_num = return_val;
+
 	if(result == 1){
 		sprintf(fusemsg->path_name, "yes");
 	}else if(result == 0){
@@ -301,7 +306,7 @@ int slove_request(amp_request_t *req){
 			send_to_client(req,0,NULL);
 			res = -errno;
 		}
-			
+		fusemsg->return_num = res;
 
 		close(fd);
 
@@ -312,6 +317,7 @@ int slove_request(amp_request_t *req){
 		memset(&meta, 0, sizeof(struct stat));
 		res = lstat(dest_path, &meta);
 		// fusemsg->page_size_now = fusemsg->bytes;
+		
 		fusemsg->server_stat = meta;
 		printf("读到的数据%s",read_buf);
 		send_to_client(req,1,read_buf);
@@ -342,6 +348,10 @@ int slove_request(amp_request_t *req){
 			res = -errno;
 		}
 		close(fd);
+
+		//把返回值搞到手
+		fusemsg->return_num = res;
+
 		//这里将结果反馈回去
 		//写一个文件就不需要反馈任何文件了
 		//将取到的元数据返回

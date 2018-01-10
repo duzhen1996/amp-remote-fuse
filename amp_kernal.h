@@ -36,6 +36,8 @@ struct __fuse_msg {
     off_t offset;
     //这里存着当前发送需要的段大小
     size_t page_size_now;
+    //返回值
+    int return_num;
     
     struct stat server_stat;
 };
