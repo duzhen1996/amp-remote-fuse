@@ -271,8 +271,11 @@ static int amp_truncate(const char *path, off_t size)
 	// 	return -errno;
 
 	// return 0;
+    //首先组装一下消息
     //打包信息
     fuse_msg_t fusemsg;
+    struct stat old_stat;
+    int res = 0;
     //初始化
     memset(&fusemsg, 0, sizeof(fuse_msg_t));
 
@@ -288,16 +291,24 @@ static int amp_truncate(const char *path, off_t size)
     }
 
     //修改元数据
-    //查看传回的文件权限
-    printf("查看传回的文件权限:%d\n", fusemsg.server_stat.st_mode);
-    fusemsg.server_stat.st_mode = mode;
-    fusemsg.server_stat.st_uid = getuid();
-    fusemsg.server_stat.st_gid = getgid();
-
-    //插入一条元数据
-    insert_metadata_table(path, &fusemsg.server_stat);
+    //将现有的mode取出来,
+    //然后更新元数据
+    //将现有的mode取出来,
+    res = get_metadata_by_pathname(path, &old_stat);
     
-    printf("截断文件处理完毕\n");
+    if(res < 0){
+        printf("找不到这个文件的元数据\n");
+    }
+
+    //更新元数据
+    fusemsg.server_stat.st_mode = old_stat.st_mode;
+    fusemsg.server_stat.st_uid = old_stat.st_uid;
+    fusemsg.server_stat.st_gid = old_stat.st_gid;
+
+    //将元数据更新到元数据表中
+    update_metadata_by_pathname(path, &fusemsg.server_stat);
+
+    printf("文件的截断处理完成\n");
 
     return 0;
 }
