@@ -200,7 +200,7 @@ int send_to_client(amp_request_t *req, int result, char* buf){
 	
 	//如果段中有类型就清空段
 	if (req->req_iov) {
-		__server_freepages(req->req_niov, &req->req_iov);
+		server_free_pages(req->req_niov, &req->req_iov);
 		free(req->req_iov);
 		req->req_iov = NULL;
 		req->req_niov = 0;
