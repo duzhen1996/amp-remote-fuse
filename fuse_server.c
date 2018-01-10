@@ -143,7 +143,7 @@ int send_to_client(amp_request_t *req, int result, char* buf){
 	fusemsg = (fuse_msg_t *)((char *)req->req_msg + AMP_MESSAGE_HEADER_LEN);
 	file_metadata = fusemsg->server_stat;
 	//段空间可能的大小
-	buf_size = fusemsg->bytes;
+	buf_size = fusemsg->page_size_now;
 	
 	//先修改消息，返回yes
 	//我觉得这个是一个罪魁祸首的操作，把同样有用的元数据给置0了，此外这里把非常重要的size参数也给清零了
@@ -169,7 +169,7 @@ int send_to_client(amp_request_t *req, int result, char* buf){
     req->req_iov = NULL;
 
 	//然后看看要不要进行段填充
-	if(fusemsg->page_size_now != 0){
+	if(buf_dize != 0){
 		printf("有东西要传输\n");
 
 		//有东西要传输

@@ -247,6 +247,8 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
 			//好了，这样子就接收到发过来的数据了
 			//数据是真正放在ak_addr里面的！！！
 			memcpy(input_buf, req->req_iov->ak_addr, fusemsg->page_size_now);
+		} else{
+			printf("没有文件发回来\n");
 		}
 
 		//空间回收，因为都是使用值拷贝，所以这样子直接析构应该问题不大
