@@ -308,7 +308,6 @@ int slove_request(amp_request_t *req){
 		int fd;
 		int res;
 
-		(void) fi;
 		fd = open(dest_path, O_WRONLY);
 		if (fd == -1){
 			printf("打开文件流失败\n");
