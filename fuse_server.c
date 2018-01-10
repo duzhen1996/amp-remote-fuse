@@ -87,8 +87,7 @@ int server_alloc_pages (void *msg, amp_u32_t *niov, amp_kiov_t **iov)
 		//为所有的段申请的大空间初始化，这是申请空间所必须附带的操作
 		memset(kiov, 0, sizeof(amp_kiov_t) * page_num);
 		
-		// size_t page_size = fusemsg->page_size_now;
-		size_t page_size = 4096;
+		size_t page_size = fusemsg->page_size_now;
 		//为每个段数据存储分别分配空间，其实就是为ak_addr分配空间
 		//为了简化操作，我们只申请一页
 		for(i = 0 ; i < page_num ; i++){
