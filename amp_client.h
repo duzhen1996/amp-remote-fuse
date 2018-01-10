@@ -402,11 +402,6 @@ int send_to_server_test(fuse_msg_t* msg, void *input_buf){
 		printf("申请段空间\n");
         err = client_alloc_pages(fusemsg, &req->req_niov, &req->req_iov);
 
-		//手动执行段空间的申请
-
-
-
-
 		if (err < 0){
             printf("段空间申请失败\n");
         }

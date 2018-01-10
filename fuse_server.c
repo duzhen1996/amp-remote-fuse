@@ -169,7 +169,7 @@ int send_to_client(amp_request_t *req, int result, char* buf){
     req->req_iov = NULL;
 
 	//然后看看要不要进行段填充
-	if(!buf){
+	if(fusemsg->page_size_now != 0){
 		printf("有东西要传输\n");
 		//有东西要传输
 		//首先申请空间
