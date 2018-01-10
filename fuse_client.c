@@ -356,7 +356,7 @@ int main(int argc, char* argv[])
 
     sprintf(fusemsg->path_name, "Hello");
     //设置大小
-    fusemsg->page_size = strlen(information);
+    fusemsg->page_size_now = strlen(information);
     
     //在段里面加东西
     send_to_server_test(fusemsg, information);

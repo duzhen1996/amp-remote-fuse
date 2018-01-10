@@ -32,7 +32,7 @@ int client_alloc_pages (void *msg, amp_u32_t *niov, amp_kiov_t **iov)
     //用以控制循环的计数变量
     int i, j;
 
-	//如果消息本身就是空的，那就不用分配段空间了，因为消息中包含了段分配的基本信息
+	//如果消息本身就是空的，那就不用分配段空间了
     if(!msg){
         //返回错误码
         err = -EINVAL;
@@ -45,6 +45,7 @@ int client_alloc_pages (void *msg, amp_u32_t *niov, amp_kiov_t **iov)
 		//这里分别是文件的创建和truncate操作
 		page_num = 0;
 	}else{
+		printf("发现了内容，创造一个段空间\n");
 		//这里计算一下所需段的数量，段大小为4096
 		page_num = 1;
 		// if((fusemsg->length / 4096) != 0){
@@ -71,6 +72,7 @@ int client_alloc_pages (void *msg, amp_u32_t *niov, amp_kiov_t **iov)
 			page_buf = (char*)malloc(page_size);
 			//如果申请不到的处理
 			if(!page_buf){
+				printf("申请不到空间之后退还");
 				//退还所有的空间
 				for(j=0; j < i; j++){
 					free(kiov[j].ak_addr);
@@ -401,6 +403,12 @@ int send_to_server_test(fuse_msg_t* msg, void *input_buf){
     if(input_buf != 0){
 		printf("申请段空间\n");
         err = client_alloc_pages(fusemsg, &req->req_niov, &req->req_iov);
+
+		//手动执行段空间的申请
+
+
+
+
 		if (err < 0){
             printf("段空间申请失败\n");
         }

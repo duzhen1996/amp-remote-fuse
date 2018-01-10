@@ -34,7 +34,7 @@ int server_queue_req (amp_request_t *req)
 //我觉得直接从fuse_msg_t的byte来判断空间的分配比较好
 int server_alloc_pages (void *msg, amp_u32_t *niov, amp_kiov_t **iov)
 {
-	
+	printf("服务器端段空间申\n")
     //用来暂存函数运行状态（错误码）
     int err = 0;
     
@@ -68,6 +68,7 @@ int server_alloc_pages (void *msg, amp_u32_t *niov, amp_kiov_t **iov)
 		//这里分别是文件的创建和truncate操作
 		page_num = 0;
 	}else{
+		printf("服务器申请段空间\n");
 		//这里计算一下所需段的数量，段大小为4096
 		page_num = 1;
 		// if((fusemsg->length / 4096) != 0){
@@ -413,7 +414,7 @@ int main(){
 		//取出消息
 		msg_get = (fuse_msg_t *)((char *)req->req_msg + AMP_MESSAGE_HEADER_LEN);
 		printf("收到了消息[main]type:%d, len:%d, msg:%s\n", msg_get->type, msg_get->bytes, msg_get->path_name);
-		
+
 		//根据消息，分别处理
 		// slove_request(req);
 	}
