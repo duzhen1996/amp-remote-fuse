@@ -185,6 +185,7 @@ int send_to_client(amp_request_t *req, int result, char* buf){
 		fusemsg->page_size_now = buf_size;
 
 		//然后申请分区
+		//分区是根据page_size_now来的
 		err = server_alloc_pages(fusemsg, &(req->req_niov), &(req->req_iov));
 
 		if(err < 0){
@@ -193,7 +194,10 @@ int send_to_client(amp_request_t *req, int result, char* buf){
 
 		//想分区中拷贝buf的内容
 		//将东西拷贝到段中
-		memcpy(req->req_iov->ak_addr, buf, req->req_niov);
+		memcpy(req->req_iov->ak_addr, buf, buf_size);
+		
+		//在全部完成之后看看文件的内容
+		printf("文件内容:%s,大小:%d\n",req->req_iov->ak_addr,fusemsg->page_size_now);
 
 		//修改包的类型
 		req->req_type = AMP_REPLY|AMP_DATA;
