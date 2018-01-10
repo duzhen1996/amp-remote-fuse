@@ -105,7 +105,7 @@ int get_metadata_by_pathname(const char* path, struct stat *output_meta){
 
     //不可能到这里
     printf("不可能到这里\n");
-    return -1
+    return -1;
 }
 
 //通过文件名来更新一个文件的元数据
