@@ -216,14 +216,11 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
 
 		//这里是要往服务器端发送的数据
 		//我们将input_buf中的数据拷贝到段中
-		memcpy( req->req_iov, input_buf, fusemsg->page_size_now);
+		memcpy( req->req_iov->ak_addr, input_buf, fusemsg->page_size_now);
     }
     
     //正式发送内容
 	printf("准备发送内容\n");
-
-	//这里我们看看段里面的内容
-	printf("");
 
     err = amp_send_sync(clt_ctxt, req, SERVER, 1, 0);
     if (err < 0) {
@@ -247,7 +244,8 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
 			printf("有文件发回来了！\n");
 			//将input_buf所指向的空间填满
 			//好了，这样子就接收到发过来的数据了
-			memcpy(input_buf, req->req_iov, fusemsg->page_size_now);
+			//数据是真正放在ak_addr里面的！！！
+			memcpy(input_buf, req->req_iov->ak_addr, fusemsg->page_size_now);
 		}
 
 		//空间回收，因为都是使用值拷贝，所以这样子直接析构应该问题不大

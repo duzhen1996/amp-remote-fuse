@@ -189,7 +189,7 @@ int send_to_client(amp_request_t *req, int result, char* buf){
 
 		//想分区中拷贝buf的内容
 		//将东西拷贝到段中
-		memcpy(req->req_iov, buf, req->req_niov);
+		memcpy(req->req_iov->ak_addr, buf, req->req_niov);
 
 		//修改包的类型
 		req->req_type = AMP_REPLY|AMP_DATA;
@@ -320,7 +320,7 @@ int slove_request(amp_request_t *req){
 		
 		
 		//因为只有一个数据块，所以就直接把第一个数据块的地址传进去
-		res = pwrite(fd, req->req_iov, fusemsg->bytes, fusemsg->offset);
+		res = pwrite(fd, req->req_iov->ak_addr, fusemsg->bytes, fusemsg->offset);
 		if (res == -1){
 			//这里反馈结果
 			send_to_client(req, 0, NULL);
@@ -416,7 +416,7 @@ int main(){
 		printf("收到了消息[main]type:%d, len:%d, msg:%s\n", msg_get->type, msg_get->bytes, msg_get->path_name);
 
 		//根据消息，分别处理
-		// slove_request(req);
+		slove_request(req);
 	}
 
 	return 0;
