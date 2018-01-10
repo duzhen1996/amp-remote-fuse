@@ -144,6 +144,58 @@ static int amp_create(const char* path, mode_t mode, struct fuse_file_info* fi)
     return 0;
 }
 
+
+static int amp_read(const char* path, char* buf, size_t bytes, off_t offset,
+                   struct fuse_file_info* fi)
+{
+    // int fd;
+	// int res;
+
+	// (void) fi;
+	// fd = open(path, O_RDONLY);
+	// if (fd == -1)
+	// 	return -errno;
+
+	// res = pread(fd, buf, size, offset);
+	// if (res == -1)
+	// 	res = -errno;
+	// close(fd);
+	// return res;
+
+    //首先组装一下消息
+    //打包信息
+    fuse_msg_t fusemsg;
+    struct stat old_stat;
+    int res = 0;
+    //初始化
+    memset(&fusemsg, 0, sizeof(fuse_msg_t));
+
+    fusemsg.type = 1;
+    strcpy(fusemsg.path_name, path);
+    fusemsg.bytes = bytes;
+    fusemsg.offset = offset;
+    
+    //发送消息，直接把buf传进去，力图修改buf的值
+    send_to_server(&fusemsg, buf);
+
+    //将现有的mode取出来,
+    res = get_metadata_by_pathname(path, &old_stat);
+    
+    if(res < 0){
+        printf("找不到这个文件的元数据\n");
+    }
+
+    //更新元数据
+    fusemsg.server_stat.st_mode = old_stat.st_mode;
+    fusemsg.server_stat.st_uid = old_stat.st_uid;
+    fusemsg.server_stat.st_gid = old_stat.st_gid;
+
+    //将元数据更新到元数据表中
+    update_metadata_by_pathname(path, &fusemsg.server_stat);
+
+    return 0;
+}
+
 static int amp_unlink(const char* path)
 {
     return 0;
@@ -154,12 +206,111 @@ static int amp_utimens(const char *path, const struct timespec ts[2])
 	return 0;
 }
 
+//看着读一个文件
+static int amp_write(const char *path, const char *buf, size_t size,
+		     off_t offset, struct fuse_file_info *fi)
+{
+	// int fd;
+	// int res;
+
+	// (void) fi;
+	// fd = open(path, O_WRONLY);
+	// if (fd == -1)
+	// 	return -errno;
+
+	// res = pwrite(fd, buf, size, offset);
+	// if (res == -1)
+	// 	res = -errno;
+
+	// close(fd);
+	// return res;
+
+    //首先组装一下消息
+    //打包信息
+    fuse_msg_t fusemsg;
+    struct stat old_stat;
+    int res = 0;
+    //初始化
+    memset(&fusemsg, 0, sizeof(fuse_msg_t));
+
+    fusemsg.type = 2;
+    strcpy(fusemsg.path_name, path);
+    fusemsg.bytes = size;
+    fusemsg.offset = offset;
+    fusemsg.page_size_now = size;
+
+    //将buf的信息传进去，发送给服务器端
+    send_to_server(&fusemsg, buf);
+
+    //然后更新元数据
+    //将现有的mode取出来,
+    res = get_metadata_by_pathname(path, &old_stat);
+    
+    if(res < 0){
+        printf("找不到这个文件的元数据\n");
+    }
+
+    //更新元数据
+    fusemsg.server_stat.st_mode = old_stat.st_mode;
+    fusemsg.server_stat.st_uid = old_stat.st_uid;
+    fusemsg.server_stat.st_gid = old_stat.st_gid;
+
+    //将元数据更新到元数据表中
+    update_metadata_by_pathname(path, &fusemsg.server_stat);
+
+    return 0;
+}
+
+//truncate文件
+static int amp_truncate(const char *path, off_t size)
+{
+	// int res;
+
+	// res = truncate(path, size);
+	// if (res == -1)
+	// 	return -errno;
+
+	// return 0;
+    //打包信息
+    fuse_msg_t fusemsg;
+    //初始化
+    memset(&fusemsg, 0, sizeof(fuse_msg_t));
+
+    fusemsg.type = 3;
+    strcpy(fusemsg.path_name, path);
+
+    //发送消息
+    send_to_server(&fusemsg, NULL);
+
+    //获取返回的元数据
+    if(!fusemsg.server_stat.st_mode){
+        printf("蛤？元数据没有传回来？\n");
+    }
+
+    //修改元数据
+    //查看传回的文件权限
+    printf("查看传回的文件权限:%d\n", fusemsg.server_stat.st_mode);
+    fusemsg.server_stat.st_mode = mode;
+    fusemsg.server_stat.st_uid = getuid();
+    fusemsg.server_stat.st_gid = getgid();
+
+    //插入一条元数据
+    insert_metadata_table(path, &fusemsg.server_stat);
+    
+    printf("截断文件处理完毕\n");
+
+    return 0;
+}
+
 static struct fuse_operations oufs_ops = {
     .getattr    =   amp_getattr,
     .readdir    =   amp_readdir,
     .create     =   amp_create,
     .unlink     =   amp_unlink,
     .utimens	=   amp_utimens,
+    .read		=   amp_read,
+    .write      =   amp_write,
+    .truncate	=   amp_truncate,
 };
 
 int main(int argc, char* argv[])

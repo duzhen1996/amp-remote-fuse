@@ -237,22 +237,63 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
 		if(fusemsg->page_size_now != 0){
 			printf("有文件发回来了！\n");
 			//将input_buf所指向的空间填满
-			memcpy(input_buf, req->req_iov, fusemsg->page_size_now);
 			//好了，这样子就接收到发过来的数据了
+			memcpy(input_buf, req->req_iov, fusemsg->page_size_now);
 		}
+
+		//空间回收，因为都是使用值拷贝，所以这样子直接析构应该问题不大
+		//如果段中有类型就清空段
+		if (req->req_iov) {
+			client_free_pages(req->req_niov, &req->req_iov);
+			free(req->req_iov);
+			req->req_iov = NULL;
+			req->req_niov = 0;
+		}
+		
+		//回收空间
+		amp_free(req->req_reply, req->req_replylen);
+		__amp_free_request(req);
 
 		return 0;
 	} else if(strcmp(fusemsg->path_name, "no")==0){
 		printf("操作失败。。。。。\n");
 		//将收到的数据放回去
 		*msg = *fusemsg;
+
+		//空间回收，因为都是使用值拷贝，所以这样子直接析构应该问题不大
+		//如果段中有类型就清空段
+		if (req->req_iov) {
+			client_free_pages(req->req_niov, &req->req_iov);
+			free(req->req_iov);
+			req->req_iov = NULL;
+			req->req_niov = 0;
+		}
+
+		//回收空间
+		amp_free(req->req_reply, req->req_replylen);
+		__amp_free_request(req);
+
 		return -1;
 	} else{
+
 		printf("传回来的是什么鬼\n");
 	}
 
 	//将收到的数据放回去
 	*msg = *fusemsg;
+
+	//空间回收，因为都是使用值拷贝，所以这样子直接析构应该问题不大
+	//如果段中有类型就清空段
+	if (req->req_iov) {
+		client_free_pages(req->req_niov, &req->req_iov);
+		free(req->req_iov);
+		req->req_iov = NULL;
+		req->req_niov = 0;
+	}
+
+	//回收空间
+	amp_free(req->req_reply, req->req_replylen);
+	__amp_free_request(req);
 	
     return 0;
 }

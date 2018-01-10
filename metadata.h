@@ -80,4 +80,46 @@ void insert_metadata_table(const char* path, struct stat *input_meta){
     }
 }
 
+//通过文件名获取一个文件的元数据，能找到返回0，找不到返回-1，将元数据通过形参传出去
+int get_metadata_by_pathname(const char* path, struct stat *output_meta){
+    printf("获取一条元数据\n");
+    //遍历元数据表，寻找元数据
+    for(i = 0; i < META_TABLE_SIZE; i++){
+        //如果两个指针都是0，那就退出
+        if(meta_en[i].path_name == 0 && meta_en[i].meta == 0){
+            printf("遍历完毕\n");
+            return -1;
+        }else{
+            //查看目录是不是一样的
+            if(strcmp(path, meta_en[i].path_name)==0){
+                printf("找到了\n");
+                *output_meta = *(meta_en[i].meta);
+                return 0;
+            }
+        }
+    }
+}
+
+//通过文件名来更新一个文件的元数据
+void update_metadata_by_pathname(const char* path, struct stat *update_meta){
+    printf("更新文件的元数据\n");
+    //遍历元数据表，寻找元数据
+    for(i = 0; i < META_TABLE_SIZE; i++){
+        //如果两个指针都是0，那就退出
+        if(meta_en[i].path_name == 0 && meta_en[i].meta == 0){
+            printf("遍历完毕，没有找到对应元数据\n");
+            break;
+        }else{
+            //查看目录是不是一样的
+            if(strcmp(path, meta_en[i].path_name)==0){
+                printf("找到了\n");
+                *(meta_en[i].meta) = *update_meta;
+                printf("元数据更新完毕\n")
+                break;
+            }
+        }
+    }
+}
+
+
 #endif
