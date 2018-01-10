@@ -293,7 +293,7 @@ int slove_request(amp_request_t *req){
 		read_buf = (char *)malloc(fusemsg->bytes);
 
 		res = pread(fd, read_buf, fusemsg->bytes, fusemsg->offset);
-		
+		printf("看看pread的返回值:%d", res);
 		if (res == -1)
 		{
 			//读文件失败

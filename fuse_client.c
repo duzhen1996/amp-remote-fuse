@@ -196,7 +196,7 @@ static int amp_read(const char* path, char* buf, size_t bytes, off_t offset,
     //将元数据更新到元数据表中
     update_metadata_by_pathname(path, &fusemsg.server_stat);
 
-    return 0;
+    return fusemsg.bytes;
 }
 
 static int amp_unlink(const char* path)
