@@ -34,7 +34,7 @@ int server_queue_req (amp_request_t *req)
 //我觉得直接从fuse_msg_t的byte来判断空间的分配比较好
 int server_alloc_pages (void *msg, amp_u32_t *niov, amp_kiov_t **iov)
 {
-	printf("服务器端段空间申\n")
+	printf("服务器端段空间申\n");
     //用来暂存函数运行状态（错误码）
     int err = 0;
     
