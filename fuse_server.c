@@ -168,9 +168,12 @@ int send_to_client(amp_request_t *req, int result, char* buf){
     req->req_niov = 0;
     req->req_iov = NULL;
 
+	printf("看看传入的指针%d", buf);
+
 	//然后看看要不要进行段填充
 	if(fusemsg->page_size_now != 0){
 		printf("有东西要传输\n");
+
 		//有东西要传输
 		//首先申请空间
 		//只有读文件要使用这个缓冲区
