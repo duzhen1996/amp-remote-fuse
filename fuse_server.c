@@ -132,17 +132,19 @@ void server_free_pages (amp_u32_t num, amp_kiov_t **kiov)
 
 //向客户端发送结果，有必要的话需要返回一个buf，result = 1代表发送成功，=0代表发送失败
 int send_to_client(amp_request_t *req, int result, char* buf){
+	int err = 0;
 	struct stat file_metadata;
-
-	
+	int buf_size;
 
 	//根据结果修改返回请求的值
 	fuse_msg_t* fusemsg = NULL;
 	fusemsg = (fuse_msg_t *)((char *)req->req_msg + AMP_MESSAGE_HEADER_LEN);
 	file_metadata = fusemsg->server_stat;
+	//段空间可能的大小
+	buf_size = fusemsg->bytes;
+	
 	//先修改消息，返回yes
 	//我觉得这个是一个罪魁祸首的操作，把同样有用的元数据给置0了，此外这里把非常重要的size参数也给清零了
-	
 	memset(fusemsg,0,sizeof(fuse_msg_t));
 	//然后把元数据放回去
 	fusemsg->server_stat = file_metadata;
@@ -170,7 +172,24 @@ int send_to_client(amp_request_t *req, int result, char* buf){
 		//首先申请空间
 		//只有读文件要使用这个缓冲区
 		//所以大小设置为读的大小
+		//首先设置一下分区大小
+		fusemsg = (fuse_msg_t *)((char *)req->req_reply + AMP_MESSAGE_HEADER_LEN);
 		
+		fusemsg->page_size_now = buf_size;
+
+		//然后申请分区
+		err = server_alloc_pages(fusemsg, &(req->req_niov), &(req->req_iov));
+
+		if(err < 0){
+			printf("分区出现错误\n");
+		}
+
+		//想分区中拷贝buf的内容
+		//将东西拷贝到段中
+		memcpy(req->iov, buf, req->niov);
+
+		//修改包的类型
+		req->req_type = AMP_REPLY|AMP_DATA;
 	}
 
 	//发之前看看元数据有没有带上
@@ -179,6 +198,14 @@ int send_to_client(amp_request_t *req, int result, char* buf){
 	//然后把东西发回去
 	amp_send_sync(this_ctxt, req, req->req_remote_type, req->req_remote_id,0);
 	
+	//如果段中有类型就清空段
+	if (req->req_iov) {
+		__server_freepages(req->req_niov, &req->req_iov);
+		free(req->req_iov);
+		req->req_iov = NULL;
+		req->req_niov = 0;
+	}
+
 	//回收空间
 	amp_free(req->req_reply, req->req_replylen);
     __amp_free_request(req);
@@ -192,6 +219,9 @@ int slove_request(amp_request_t *req){
 	int res;
 
 	char* tmp_path_name = NULL;
+
+	//设计一个缓冲区来暂存从文件中读出的数据
+	char* read_buf = NULL;
 	
 	//根据请求类型处理
 	//这里处理新增文件的请求
@@ -229,10 +259,96 @@ int slove_request(amp_request_t *req){
 			printf("err:%d,mode:%d\n",res,fusemsg->server_stat.st_mode);
 			send_to_client(req,1,NULL);
 		}else{
-			printf("文件创建失败");
+			printf("文件创建失败\n");
 			send_to_client(req,0,NULL);
 		}
 	}
+
+	//读文件
+	if(fusemsg->type == 1){
+		printf("读一个文件\n");
+		int fd;
+		int res;
+
+		(void) fi;
+		fd = open(dest_path, O_RDONLY);
+		if (fd == -1){
+			printf("读文件流打开失败");
+			send_to_client(req,0,NULL);
+			return -errno;
+		}
+		
+		//申请一个buf来存储读出的数据
+		printf("申请读文件的缓冲区\n");
+		read_buf = (char *)malloc(fusemsg->bytes);
+
+		res = pread(fd, read_buf, fusemsg->bytes, fusemsg->offset);
+		
+		if (res == -1)
+		{
+			//读文件失败
+			printf("读文件失败\n")
+			send_to_client(req,0,NULL);
+			res = -errno;
+		}
+			
+
+		close(fd);
+
+		//这里就读到了对应文件
+		//把东西传回去
+		send_to_client(req,1,read_buf);
+		
+		return res;
+	}
+
+	//写文件
+	if(fusemsg->type == 2){
+		printf("写一个文件\n");
+		
+		int fd;
+		int res;
+
+		(void) fi;
+		fd = open(dest_path, O_WRONLY);
+		if (fd == -1){
+			printf("打开文件流失败\n");
+			send_to_client(req, 0, NULL);
+			return -errno;
+		}
+		
+		
+		//因为只有一个数据块，所以就直接把第一个数据块的地址传进去
+		res = pwrite(fd, req->req_iov, fusemsg->bytes, fusemsg->offset);
+		if (res == -1){
+			//这里反馈结果
+			send_to_client(req, 0, NULL);
+			res = -errno;
+		}
+
+		//这里将结果反馈回去
+		//写一个文件就不需要反馈任何文件了
+		send_to_client(req, 1, NULL);
+		
+		close(fd);
+		return res;
+	}
+
+	//截断文件
+	if(fusemsg->type == 3){
+		printf("截断一个文件\n");
+		
+		res = truncate(dest_path, fusemsg->length);
+		if (res == -1){
+			send_to_client(req, 0, NULL);
+			return -errno;
+		}
+		
+		send_to_client(req, 1, NULL);
+		
+		return 0;
+	}
+
 	return 0;
 }
 
@@ -299,8 +415,6 @@ int main(){
 
 		//根据消息，分别处理
 		slove_request(req);
-		//收到消息之后不回复，先看看可以走通吗
-
 	}
 
 	return 0;

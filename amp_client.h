@@ -209,6 +209,10 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
             printf("段空间申请失败\n");
         }
         req->req_type = AMP_REQUEST|AMP_DATA;
+
+		//这里是要往服务器端发送的数据
+		//我们将input_buf中的数据拷贝到段中
+		memcpy( req->req_iov, input_buf, fusemsg->page_size_now);
     }
     
     //正式发送内容
@@ -224,13 +228,19 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
 	fusemsg = (fuse_msg_t *)((char *)replymsg + AMP_MESSAGE_HEADER_LEN);
 
 	if(strcmp(fusemsg->path_name, "yes") == 0){
-		printf("mode:%d\n",fusemsg->server_stat.st_mode);
 		//这里说明操作成功了
 		printf("操作成功6666\n");
 		//将收到的数据放回去
 		*msg = *fusemsg;
-		//在这里看看数据是不是改了
-		printf("mode:%d\n",msg->server_stat.st_mode);
+		
+		//这里查看发回来的东西
+		if(fusemsg->page_size_now != 0){
+			printf("有文件发回来了！\n");
+			//将input_buf所指向的空间填满
+			memcpy(input_buf, req->req_iov, fusemsg->page_size_now);
+			//好了，这样子就接收到发过来的数据了
+		}
+
 		return 0;
 	} else if(strcmp(fusemsg->path_name, "no")==0){
 		printf("操作失败。。。。。\n");
