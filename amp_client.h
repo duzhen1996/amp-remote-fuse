@@ -221,7 +221,7 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
 	printf("准备发送内容\n");
 
 	//这里我们看看段里面的内容
-	
+	printf("");
 
     err = amp_send_sync(clt_ctxt, req, SERVER, 1, 0);
     if (err < 0) {
@@ -305,6 +305,197 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
     return 0;
 }
 
+
+int send_to_server_test(fuse_msg_t* msg, void *input_buf){
+	int err = 0;
+	
+    //通信地址
+    int addr;
+	struct in_addr naddr;
+
+    //要发送的请求
+	amp_request_t *req = NULL;
+	fuse_msg_t *fusemsg = NULL;
+	amp_message_t *reqmsg = NULL;
+	amp_message_t *replymsg = NULL;
+	
+    //为一个消息申请空间的大小
+    int size;
+
+    //循环计数变量
+	// int i;
+
+    //设置地址
+    err = inet_aton("127.0.0.1", &naddr);
+	if (!err) {
+		printf("ip地址错误\n");
+		exit(1);
+	}
+
+    //设置地址的网络格式
+	addr = htonl(naddr.s_addr);
+
+	//amp_lock_init(&request_queue_lock);
+	//amp_sem_init_locked(request_queue_sem);
+    //初始化消息上下文
+	clt_ctxt = amp_sys_init(CLIENT, CLIENT_ID1);
+
+	if (!clt_ctxt) {
+		printf("客户端初始化失败\n");
+		exit(1);
+	}
+    
+    printf("客户端初始化完毕\n");
+
+    //这里创建连接
+    err = amp_create_connection(clt_ctxt, 
+                                    SERVER, 
+                                    SERVER_ID1, 
+				    addr,
+				    SERVER_PORT,
+				    AMP_CONN_TYPE_TCP,
+				    AMP_CONN_DIRECTION_CONNECT,
+				    NULL,
+				    client_alloc_pages,
+				    client_free_pages);
+
+    if (err < 0) {
+		printf("与服务器连接失败, err:%d\n", err);
+		amp_sys_finalize(clt_ctxt);
+		exit(1);
+	}
+
+    //申请一个请求
+    err = __amp_alloc_request(&req);
+	if (err < 0) {
+		printf("请求申请失败, err:%d\n", err);
+		exit(1);
+	}
+
+    //为消息申请空间
+    size = AMP_MESSAGE_HEADER_LEN + sizeof(fuse_msg_t);
+	reqmsg = (amp_message_t *)malloc(size);
+	if (!reqmsg) {
+		printf("消息空间分配错误, err:%d\n", err);
+		exit(1);
+	}
+
+    //初始化要发送的消息空间
+    memset(reqmsg, 0, size);
+	fusemsg = (fuse_msg_t *)((char *)reqmsg + AMP_MESSAGE_HEADER_LEN);
+	
+    //然后我们把消息拷贝进来
+    *fusemsg = *msg;
+
+    //然后开始发送
+    req->req_msg = reqmsg;
+    req->req_msglen = size;
+	req->req_need_ack = 0;
+	req->req_resent = 0;
+	req->req_type = AMP_REQUEST|AMP_MSG;
+    req->req_niov = 0;
+    req->req_iov = NULL;
+    
+
+    //看看有没有段空间的申请。对于客户端来说，只有写文件需要申请并填充段空间
+    if(input_buf != 0){
+		printf("申请段空间\n");
+        err = client_alloc_pages(fusemsg, &req->req_niov, &req->req_iov);
+		if (err < 0){
+            printf("段空间申请失败\n");
+        }
+        req->req_type = AMP_REQUEST|AMP_DATA;
+
+		//这里是要往服务器端发送的数据
+		//我们将input_buf中的数据拷贝到段中
+		memcpy( req->req_iov, input_buf, fusemsg->page_size_now);
+    }
+    
+    //正式发送内容
+	printf("准备发送内容\n");
+
+    err = amp_send_sync(clt_ctxt, req, SERVER, 1, 0);
+    if (err < 0) {
+			printf("消息发送失败, err:%d\n", err);
+			return err;
+	}
+
+    printf("消息发送完毕\n");
+    //现在接受
+	/**
+	replymsg = req->req_reply;
+	fusemsg = (fuse_msg_t *)((char *)replymsg + AMP_MESSAGE_HEADER_LEN);
+	
+	if(strcmp(fusemsg->path_name, "yes") == 0){
+		// //这里说明操作成功了
+		printf("操作成功6666\n");
+		// //将收到的数据放回去
+		// *msg = *fusemsg;
+		
+		// //这里查看发回来的东西
+		// if(fusemsg->page_size_now != 0){
+		// 	printf("有文件发回来了！\n");
+		// 	//将input_buf所指向的空间填满
+		// 	//好了，这样子就接收到发过来的数据了
+		// 	memcpy(input_buf, req->req_iov, fusemsg->page_size_now);
+		// }
+
+		//空间回收，因为都是使用值拷贝，所以这样子直接析构应该问题不大
+		//如果段中有类型就清空段
+		if (req->req_iov) {
+			client_free_pages(req->req_niov, &req->req_iov);
+			free(req->req_iov);
+			req->req_iov = NULL;
+			req->req_niov = 0;
+		}
+
+		//回收空间
+		amp_free(req->req_reply, req->req_replylen);
+		__amp_free_request(req);
+
+		return 0;
+	} else if(strcmp(fusemsg->path_name, "no")==0){
+		printf("操作失败。。。。。\n");
+		//将收到的数据放回去
+		*msg = *fusemsg;
+
+		//空间回收，因为都是使用值拷贝，所以这样子直接析构应该问题不大
+		//如果段中有类型就清空段
+		if (req->req_iov) {
+			client_free_pages(req->req_niov, &req->req_iov);
+			free(req->req_iov);
+			req->req_iov = NULL;
+			req->req_niov = 0;
+		}
+
+		//回收空间
+		amp_free(req->req_reply, req->req_replylen);
+		__amp_free_request(req);
+
+		return -1;
+	} else{
+
+		printf("传回来的是什么鬼\n");
+	}
+
+	// //将收到的数据放回去
+	// *msg = *fusemsg;
+
+	//空间回收，因为都是使用值拷贝，所以这样子直接析构应该问题不大
+	//如果段中有类型就清空段
+	if (req->req_iov) {
+		client_free_pages(req->req_niov, &req->req_iov);
+		free(req->req_iov);
+		req->req_iov = NULL;
+		req->req_niov = 0;
+	}
+
+	//回收空间
+	amp_free(req->req_reply, req->req_replylen);
+	__amp_free_request(req);
+	**/
+    return 0;
+}
 
 
 

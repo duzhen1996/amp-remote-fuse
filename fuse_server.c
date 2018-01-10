@@ -169,6 +169,7 @@ int send_to_client(amp_request_t *req, int result, char* buf){
 
 	//然后看看要不要进行段填充
 	if(!buf){
+		printf("有东西要传输\n");
 		//有东西要传输
 		//首先申请空间
 		//只有读文件要使用这个缓冲区
@@ -412,9 +413,9 @@ int main(){
 		//取出消息
 		msg_get = (fuse_msg_t *)((char *)req->req_msg + AMP_MESSAGE_HEADER_LEN);
 		printf("收到了消息[main]type:%d, len:%d, msg:%s\n", msg_get->type, msg_get->bytes, msg_get->path_name);
-
+		
 		//根据消息，分别处理
-		slove_request(req);
+		// slove_request(req);
 	}
 
 	return 0;

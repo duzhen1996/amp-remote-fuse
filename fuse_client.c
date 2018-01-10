@@ -344,6 +344,21 @@ int main(int argc, char* argv[])
     // insert_metadata_table(&(fusemsg->path_name), &(fusemsg->server_stat));
     // 
     // return 0;
-    return fuse_main(argc, argv, &oufs_ops, NULL);
+    // return fuse_main(argc, argv, &oufs_ops, NULL);
     //printf("运行结束\n");
+
+
+    //进行文件传输的单元测试
+    fuse_msg_t* fusemsg = (fuse_msg_t *)malloc(sizeof(fuse_msg_t));
+    memset(fusemsg, 0, sizeof(fuse_msg_t));
+
+    char* information = "I am angry";
+
+    sprintf(fusemsg->path_name, "Hello");
+    //设置大小
+    fusemsg->page_size = strlen(information);
+    
+    //在段里面加东西
+    send_to_server_test(fusemsg, information);
+    
 }
