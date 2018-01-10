@@ -246,6 +246,7 @@ int send_to_server(fuse_msg_t* msg, void *input_buf){
 			//将input_buf所指向的空间填满
 			//好了，这样子就接收到发过来的数据了
 			//数据是真正放在ak_addr里面的！！！
+			sprintf("文件内容:%s,大小:%d\n",req->req_iov->ak_addr,fusemsg->page_size_now);
 			memcpy(input_buf, req->req_iov->ak_addr, fusemsg->page_size_now);
 		} else{
 			printf("没有文件发回来\n");
